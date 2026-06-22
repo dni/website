@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Boltz web app - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>Boltz web app</h1>
+        <p><time datetime="2023-02-19">2023-02-19</time></p>
+
+        <h2>introduction</h2>
+        <p>around this time i started working on the <a href="https://github.com/BoltzExchange/boltz-web-app">Boltz web app</a>. the goal was to make a clean browser app for non-custodial swaps between bitcoin layers.</p>
+
+        <p>my first public commits there were on february 19, 2023. it started with layout, navigation, build setup, assets and early swap screens, and later became the official web app served at boltz.exchange.</p>
+
+        <h2>submarine swap UX</h2>
+        <p>one small UX win i still like was saving one step in the submarine swap flow. instead of asking the user to enter an amount and then paste a lightning invoice, the app can use the amount from the pasted invoice.</p>
+
+        <p>that sounds small, but it matters. less typing, fewer mismatches, and one less place where the user can make a mistake while moving between bitcoin and lightning.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/BoltzExchange/boltz-web-app">BoltzExchange/boltz-web-app</a></li>
+          <li><a href="https://github.com/BoltzExchange/boltz-web-app/commit/a8af9ce3e8eac396b4245293e770544703aebd8d">first public authored commit i found</a></li>
+          <li><a href="https://github.com/BoltzExchange/boltz-web-app/commit/7dcc6219418c24381cd70040900bc429c7946c21">use invoice amount from pasted invoice</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>

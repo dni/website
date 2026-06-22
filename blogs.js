@@ -22,6 +22,17 @@ window.blogs = [
     "url": "blogs/2026-06-22-qubesos-how-to-not-get-hacked-when-developing.html"
   },
   {
+    "title": "Boltz web app",
+    "date": "2023-02-19",
+    "categories": [
+      "bitcoin",
+      "lightning",
+      "boltz",
+      "web"
+    ],
+    "url": "blogs/2023-02-19-boltz-web-app.html"
+  },
+  {
     "title": "building and setup of bitcoin core and lightning node on ubuntu server in aws ec2",
     "date": "2022-01-23",
     "categories": [],
