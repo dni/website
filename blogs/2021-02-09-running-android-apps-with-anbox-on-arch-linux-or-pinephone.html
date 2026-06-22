@@ -10,9 +10,8 @@
     <article>
         <h1>running android apps with anbox on linux and pinephone</h1>
         <p><time datetime="2021-02-09">2021-02-09</time></p>
-        <h2>WIP</h2>
         <h2>introduction</h2>
-        <p>TODO:</p>
+        <p>short notes from trying to run android apps with anbox on linux and the pinephone. it worked well enough for testing, but it still felt experimental.</p>
         <h2>pre installation</h2>
         <p>check if kernel modules are installed</p>
         <pre><code>modprobe -a binder-linux ashmem-linux</code></pre>
@@ -24,11 +23,16 @@
         trizen -S anbox-image-houdini-rooted
         trizen -S anbox-git</code></pre>
         <h2>configuration</h2>
+        <p>after installing the packages, start the anbox services and make sure the binder and ashmem modules are loaded. if anbox does not start, reboot once and check the service logs.</p>
         <h2>install an app</h2>
+        <p>install apps with adb after anbox is running.</p>
+        <pre><code>adb install app.apk</code></pre>
         <h3>encountered error</h3>
         <p>i got an unexpected error in the AUR public key is unknown when clone the git repostory, i solved it by using following commands</p>
         <pre><code>pacman-key --refresh-keys
         gpg --keyserver keys.gnupg.net --recv-keys KEYNUMBER</code></pre>
+        <h2>conclusion</h2>
+        <p>anbox was usable for experiments, but on the pinephone i would only use it for light testing and not as a daily android replacement.</p>
     </article>
     <hr>
     <h2>Blog</h2>
