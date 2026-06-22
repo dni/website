@@ -22,7 +22,7 @@ window.blogs = [
     "url": "blogs/2026-06-22-qubesos-how-to-not-get-hacked-when-developing.html"
   },
   {
-    "title": "The joy of the Boltz web app',
+    "title": "The joy of the Boltz web app",
     "date": "2023-02-19",
     "categories": [
       "bitcoin",
