@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>building the kernel for the pinephone - dnilabs.com</title>
+    <script src="../blogs.js"></script>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>building the kernel for the pinephone</h1>
+        <p><time datetime="2021-05-22">2021-05-22</time></p>
+        <h2>build dependencies</h2>
+        <pre><code>sudo pacman -S build-essentials fakeroot bc flex bison autoconf</code></pre>
+        <h2>configure</h2>
+        <pre><code>git clone https://github.com/dreemurrs-embedded/Pine64-Arch
+        cd Pine64-Arch/PKGBUILDS/pine64/linux-pine64/
+        vim config
+        makepkg -s</code></pre>
+        <h4>if build fails</h4>
+        <pre><code>rm -r src/</code></pre>
+        <h2>install kernel</h2>
+        <pre><code>sudo pacman -U linux-pine64..... pkg.tar.xz</code></pre>
+        <h2>Links</h2>
+        <ul>
+          <li><a href="https://github.com/dreemurrs-embedded/Pine64-Arch">Github Repository</a></li>
+          <li>Matrix: #archmobile:kde.org</li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "../" + blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
+</body>
+</html>

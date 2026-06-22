@@ -1,0 +1,87 @@
+window.blogs = [
+  {
+    "title": "building and setup of bitcoin core and lightning node on ubuntu server in aws ec2",
+    "date": "2022-01-23",
+    "categories": [],
+    "url": "blogs/2022-01-23-manually-installing-bitcoin-core-on-ubuntu.html"
+  },
+  {
+    "title": "setting up a mailserver on ubuntu server",
+    "date": "2022-01-22",
+    "categories": [],
+    "url": "blogs/2022-01-22-setting-up-a-mailserver.html"
+  },
+  {
+    "title": "creating a lnbits sendmail extension with python, bitcoin lightning",
+    "date": "2022-01-21",
+    "categories": [],
+    "url": "blogs/2022-01-21-bitcoin-lightning-lnbits-sendmail-extension.html"
+  },
+  {
+    "title": "vimspector to the rescue, i finally have a debugger!",
+    "date": "2022-01-05",
+    "categories": [],
+    "url": "blogs/2022-01-05-vimspector-to-the-rescue.html"
+  },
+  {
+    "title": "a sxmo inspired rethinking of my dotfiles and also a proof of concept for a new structuring of sxmo-utils",
+    "date": "2021-06-27",
+    "categories": [],
+    "url": "blogs/2021-06-27-restructuring-dotfiles-rethinking-sxmo-structure.html"
+  },
+  {
+    "title": "adventures with arch linux arm and sxmo on the pinephone",
+    "date": "2021-06-21",
+    "categories": [],
+    "url": "blogs/2021-06-21-adventures-with-arch-arm-sxmo-pinephone.html"
+  },
+  {
+    "title": "building the kernel for the pinephone",
+    "date": "2021-05-22",
+    "categories": [
+      "linux",
+      "pinephone",
+      "kernel"
+    ],
+    "url": "blogs/2021-05-22-building-linux-kernel-on-pinephone.html"
+  },
+  {
+    "title": "running android apps with anbox on linux and pinephone",
+    "date": "2021-02-09",
+    "categories": [
+      "linux",
+      "pinephone",
+      "anbox",
+      "android"
+    ],
+    "url": "blogs/2021-02-09-running-android-apps-with-anbox-on-arch-linux-or-pinephone.html"
+  },
+  {
+    "title": "experimenting with the bitcoin lightning network, setting up local wallets and a btcpay server",
+    "date": "2020-08-12",
+    "categories": [
+      "bitcoin",
+      "lightningnetwork"
+    ],
+    "url": "blogs/2020-08-12-experimenting-with-bitcoin-lightning.html"
+  },
+  {
+    "title": "creating qr codes and simple a website for an interactive art installation",
+    "date": "2018-04-07",
+    "categories": [
+      "web",
+      "html",
+      "art"
+    ],
+    "url": "blogs/2018-04-07-simple-webapp-for-an-installation.html"
+  },
+  {
+    "title": "using multiple password storages with the unix password manager",
+    "date": "2018-04-07",
+    "categories": [
+      "unix",
+      "security"
+    ],
+    "url": "blogs/2018-04-07-using-multiple-password-storages.html"
+  }
+];

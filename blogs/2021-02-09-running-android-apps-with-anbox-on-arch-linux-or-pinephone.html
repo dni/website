@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>running android apps with anbox on linux and pinephone - dnilabs.com</title>
+    <script src="../blogs.js"></script>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>running android apps with anbox on linux and pinephone</h1>
+        <p><time datetime="2021-02-09">2021-02-09</time></p>
+        <h2>WIP</h2>
+        <h2>introduction</h2>
+        <p>TODO:</p>
+        <h2>pre installation</h2>
+        <p>check if kernel modules are installed</p>
+        <pre><code>modprobe -a binder-linux ashmem-linux</code></pre>
+        <p>if they are not, install them with:</p>
+        <pre><code>modprobe -a binder-linux ashmem-linux</code></pre>
+        <h2>installation</h2>
+        <p>download from AUR, i use trizen for that. package linux-zen-anbox included kernel modules if you already have them you dont need to install it.</p>
+        <pre><code>trizen -S linux-zen-anbox
+        trizen -S anbox-image-houdini-rooted
+        trizen -S anbox-git</code></pre>
+        <h2>configuration</h2>
+        <h2>install an app</h2>
+        <h3>encountered error</h3>
+        <p>i got an unexpected error in the AUR public key is unknown when clone the git repostory, i solved it by using following commands</p>
+        <pre><code>pacman-key --refresh-keys
+        gpg --keyserver keys.gnupg.net --recv-keys KEYNUMBER</code></pre>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "../" + blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
+</body>
+</html>

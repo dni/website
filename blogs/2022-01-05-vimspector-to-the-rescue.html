@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vimspector to the rescue, i finally have a debugger! - dnilabs.com</title>
+    <script src="../blogs.js"></script>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>vimspector to the rescue, i finally have a debugger!</h1>
+        <p><time datetime="2022-01-05">2022-01-05</time></p>
+        <hr>
+        <h2>introduction</h2>
+        <p>i just wanna share my experience here, i finally found a debugger in vim i like to use</p>
+        <hr>
+        <h2>vimspector</h2>
+        <p>its vimspector, i feel like it that kind of debugger i always wanted, with some additional keybind to my vimrc i'm finally can have the debugging experience i always dreamed of :), im gonna share my binds with you</p>
+        <hr>
+        <h2>php debugging</h2>
+        <p>as a webdeveloper in my work time i almost exclusively work on php, and php debugging with xdebug is very possible. i encountered some problems with ubuntu to and i went for compiling vim with latest python 3.8 support. here are my scripts for using it in a ubuntu dev enviroment. also some stuff on the vimspector side wasn't working mostly due to me not having node installed, it was also missing from the docs, so did a <a href="https://github.com/puremourning/vimspector/commit/c03d8f9ee137bbf2727ffdb37b8f942c97989638">PR</a>. which was merged :). here is the php configuration i use for my typo3 projects, .vimspector.json</p>
+        <pre><code>{
+          &quot;configurations&quot;: {
+            &quot;Listen for XDebug&quot;: {
+              &quot;adapter&quot;: &quot;vscode-php-debug&quot;,
+              &quot;siletypes&quot;: [ &quot;php&quot; ],
+              &quot;configuration&quot;: {
+                &quot;name&quot;: &quot;Listen for XDebug&quot;,
+                &quot;type&quot;: &quot;php&quot;,
+                &quot;request&quot;: &quot;launch&quot;,
+                &quot;port&quot;: 9003,
+                &quot;stopOnEntry&quot;: false,
+                &quot;pathMappings&quot;: {
+                  &quot;/var/www/project&quot;: &quot;${workspaceRoot}/public&quot;
+                }
+              }
+            }
+          }
+        }
+        </code></pre>
+        <p>also before using that i had to use this vim command</p>
+        <pre><code>:VimspectorInstall vscode-php-debug</code></pre>
+        <hr>
+        <h2>python debugging</h2>
+        <p>python debugging for my lnbits extension() was a breeze to i just had to use following .vimspector.json configuration</p>
+        <pre><code>{
+          &quot;configurations&quot;: {
+            &quot;Python Attach&quot;: {
+              &quot;adapter&quot;: &quot;multi-session&quot;,
+              &quot;filetypes&quot;: [ &quot;python&quot; ],
+              &quot;configuration&quot;: {
+                &quot;request&quot;: &quot;attach&quot;,
+                &quot;pathMappings&quot;: [{
+                    &quot;localRoot&quot;: &quot;${workspaceRoot}&quot;,
+                    &quot;remoteRoot&quot;: &quot;/app&quot;
+                  }]
+              }
+            }
+          }
+        }</code></pre>
+        <hr>
+        <h2>compiling vim with latest python3.8 support on ubuntu</h2>
+        <p>i sadly had to compile vim and my development ubuntu machines :( and arch it was no problem at all.</p>
+        <ul>
+          <li><a href="https://github.com/dni/scripts/blob/main/server/ubuntu/devtools.sh#L9">vim compile script</a></li>
+        </ul>
+        <hr>
+        <h2>vim key binds</h2>
+        <p>:) nice binds, i also used maximizer plugin to fullscreen debugging windows</p>
+        <pre><code>&quot; DEBUGGER
+        nnoremap &lt;leader&gt;dd :call vimspector#Launch()&lt;CR&gt;
+        nnoremap &lt;leader&gt;dq :call vimspector#Reset()&lt;CR&gt;
+        nnoremap &lt;leader&gt;d&lt;space&gt; :call vimspector#Continue()&lt;CR&gt;
+        nnoremap &lt;leader&gt;dc :call win_gotoid(g:vimspector_session_windows.code)&lt;CR&gt;
+        nnoremap &lt;leader&gt;dt :call win_gotoid(g:vimspector_session_windows.tagpage)&lt;CR&gt;
+        nnoremap &lt;leader&gt;dv :call win_gotoid(g:vimspector_session_windows.variables)&lt;CR&gt;
+        nnoremap &lt;leader&gt;dw :call win_gotoid(g:vimspector_session_windows.watches)&lt;CR&gt;
+        nnoremap &lt;leader&gt;ds :call win_gotoid(g:vimspector_session_windows.stack_trace)&lt;CR&gt;
+        nnoremap &lt;leader&gt;do :call win_gotoid(g:vimspector_session_windows.output)&lt;CR&gt;
+        nmap &lt;leader&gt;dh &lt;Plug&gt;VimspectorStepOver
+        nmap &lt;leader&gt;dj &lt;Plug&gt;VimspectorStepInto
+        nmap &lt;leader&gt;dk &lt;Plug&gt;VimspectorStepOut
+        nmap &lt;leader&gt;dl &lt;Plug&gt;VimspectorRunToCursor
+        nmap &lt;leader&gt;dr &lt;Plug&gt;VimspectorRestart
+        nmap &lt;leader&gt;db &lt;Plug&gt;VimspectorToggleBreakpoint
+        nmap &lt;leader&gt;dbc &lt;Plug&gt;VimspectorToggleConditionalBreakpoint
+        
+        &quot; maximizer
+        nnoremap &lt;leader&gt;m :MaximizerToggle&lt;CR&gt;
+        &quot;vnoremap &lt;leader&gt;m :MaximizerToggle&lt;CR&gt;gv
+        &quot;inoremap &lt;leader&gt;m &lt;C-o&gt;:MaximizerToggle&lt;CR&gt;
+        </code></pre>
+        <hr>
+        <h2>links</h2>
+        <ul>
+          <li><a href="https://github.com/dni/.dotfiles/blob/main/vim/.vimrc">.vimrc</a></li>
+          <li><a href="https://github.com/dni/.dotfiles">dotfiles</a></li>
+          <li><a href="https://github.com/dni/scripts/blob/main/server/ubuntu/devtools.sh#L9">ubuntu vim compile script</a></li>
+          <li><a href="https://github.com/puremourning/vimspector">vimspector</a></li>
+          <li><a href="https://github.com/puremourning/vimspector/commit/c03d8f9ee137bbf2727ffdb37b8f942c97989638">PR in vimspector</a></li>
+          <li><a href="https://blog.dnilabs.com/2022/01/21/bitcoin-lightning-lnbits-sendmail-extension.html">lnbits blog</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "../" + blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
+</body>
+</html>

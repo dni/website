@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>dnilabs.com - personal website</title>
+    <script src="blogs.js"></script>
 </head>
 <body>
     <h1>Hi! my name is dni.</h1>
-    <p>In the past i have done websites. nowadays i contribute to FOSS. Send me an email to <a href="mailto:office@dnilabs.com">office@dnilabs.com</a>
+    <p>In the past i have done websites. nowadays i contribute to FOSS. Send me an email to <a href="mailto:office@dnilabs.com">office@dnilabs.com</a></p>
     <ul>
-        <li><a href="https://blog.dnilabs.com" target="_blank" rel="noopener noreferrer">Blog</a></li>
-        <li><a href="https://github.com./dni" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        <li><a href="https://github.com/dni" target="_blank" rel="noopener noreferrer">GitHub</a></li>
         <li><a href="https://x.com/dnilabs" target="_blank" rel="noopener noreferrer">X (Twitter)</a></li>
     </ul>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
 </body>
 </html>

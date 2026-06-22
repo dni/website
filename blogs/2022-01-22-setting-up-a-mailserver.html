@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>setting up a mailserver on ubuntu server - dnilabs.com</title>
+    <script src="../blogs.js"></script>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>setting up a mailserver on ubuntu server</h1>
+        <p><time datetime="2022-01-22">2022-01-22</time></p>
+        <hr>
+        <h2>after many tries and failures, i finally did it</h2>
+        <p>i recently stumpled upon this very nice <a href="https://github.com/LukeSmithxyz/emailwiz">emailwiz</a> script from LukeSmithxyz on github. Inspired by that, i gave setting up my own mailserver another try. It was surprisingly simple, it is running for weeks now and i had no troubles so far.</p>
+        <hr>
+        <h2>modification</h2>
+        <p>i modified the script a little bit more included the certbot stuff and patched some stuff i found on the github issues pages. Github link: <a href="https://github.com/dni/scripts/blob/main/server/ubuntu/email.sh">install-email</a> neue version</p>
+        <hr>
+        <h2>multiple mailboxes and domains</h2>
+        <p>for this i had browse the web a little while and found this 2 useful resources <a href="http://www.postfix.org/VIRTUAL_README.html">postfix virtual</a> and <a href="https://www.linuxbabe.com/redhat/host-multiple-mail-domains-in-postfixadmin-centos-rhel">linuxbabe</a>.</p>
+        <ol>
+          <li>you have to add a new unix user for each mailbox</li>
+        </ol>
+        <pre><code> useradd -m -G mail newaccount
+         passwd newaccount</code></pre>
+        <ol>
+          <li>expand the ssl certificate, you need to have the A and CNAME dns record working for the SSL certificate, see 5.</li>
+        </ol>
+        <pre><code>certbot certonly --webroot --agree-tos --text --non-interactive --webroot-path /var/www/html -d mail.domain1.com,mail.domain2.org --expand</code></pre>
+        <ol>
+          <li>generate the dkim keys and edit <code>signingtable</code>, <code>keytable</code> and <code>trustedhosts</code>.</li>
+        </ol>
+        <pre><code>opendkim-genkey -b 2048 -d domain2.org -D /etc/postfix/dkim/ -s mail-domain2 -v
+        chown opendkim:opendkim mail-domain2.private
+        echo &quot;mail-domain2._domainkey.domain2.org domain2.org:mail-domain2:/etc/postfix/dkim/mail-domain2.private&quot; &gt;&gt; /etc/postfix/dkim/keytable
+        echo &quot;*.domain2.org&quot; &gt;&gt; /etc/postfix/dkim/trustedhosts
+        echo &quot;*@domain2.org mail-domain2._domainkey.domain2.org&quot; &gt;&gt; /etc/postfix/dkim/signingtable</code></pre>
+        <ol>
+          <li>edit the file <code>/etc/postfix/virtual</code>.</li>
+        </ol>
+        <p>for first time using more than 1 accounts you also need to configure postfix <code>main.cf</code> and add a file <code>virtual</code>. important! do not add you main domain <code>domain1.com</code> to your <code>virtual_alias_domains</code>.</p>
+        <pre><code>postconf -e &quot;virtual_alias_domains = domain2.org&quot;
+        postconf -e &quot;virtual_alias_maps = hash:/etc/postfix/virtual&quot;
+        cat &lt;&lt;EOF
+        postmaster@domain1.com   postmaster
+        office@domain1.com       oldaccount
+        admin@domain1.com        oldaccount
+        postmaster@domain2.org   postmaster
+        info@domain2.org         newaccount
+        EOF &gt; /etc/postfix/virtual</code></pre>
+        <hr>
+        <ol>
+          <li>add all the required dns record. reverse dns is not needed multiple times it is fine if your main domain works.</li>
+        </ol>
+        <p>note: replace <code>127.0.0.1</code> with your ip address.</p>
+        <pre><code>A     domain2.org        &quot;127.0.0.1&quot;
+        A     mail.domain2.org   &quot;127.0.0.1&quot;
+        MX    domain2.org        &quot;10 mail.domain2.org&quot;
+        TXT   domain2.org        &quot;v=spf1 mx a:mail.domain2.org -all&quot;
+        TXT   _dmarc.domain2.org &quot;v=DMARC1; p=reject; rua=mailto:dmarc@domain2.org; fo=1&quot;</code></pre>
+        <p>the domainkey TXT record you can <code>cat /etc/postfix/dkim/mail-domain2.txt</code>. i shortened the rsa key, but it should look something like that:</p>
+        <pre><code>TXT mail-domain2._domainkey.domain2.org &quot;v=DKIM1; h=sha256; k=rsa; \&quot;&quot;
+        &quot;p=MIIBIjANBgkqhkiG9WbcWfa2FgonIQH/HHEpK5nFF5yJ&quot;
+        &quot;X2McsrH0Bm4JvekHgUVQlpboNCCP2+m1UlFQML4wIDAQAB&quot;</code></pre>
+        <hr>
+        <p>reload configuration afterwards</p>
+        <pre><code>postmap /etc/postfix/virtual
+        postfix reload</code></pre>
+        <h2>mail client - mutt</h2>
+        <p>i also use mutt for mail and i found this very nice <a href="https://github.com/LukeSmithxyz/mutt-wizard">mutt-wizard</a> script also from LukeSmithxyz, for setting up the addresses. it is very well documented. you need to install <code>neomutt</code> for this to work properly.</p>
+        <hr>
+        <h2>links</h2>
+        <ul>
+          <li><a href="https://github.com/LukeSmithxyz/emailwiz">emailwiz</a></li>
+          <li><a href="https://github.com/dni/scripts/blob/main/server/ubuntu/email.sh">install-email</a></li>
+          <li><a href="http://www.postfix.org/VIRTUAL_README.html">postfix virtual</a></li>
+          <li><a href="https://www.linuxbabe.com/redhat/host-multiple-mail-domains-in-postfixadmin-centos-rhel">linuxbabe</a></li>
+          <li><a href="https://github.com/LukeSmithxyz/mutt-wizard">mutt-wizard</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "../" + blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
+</body>
+</html>

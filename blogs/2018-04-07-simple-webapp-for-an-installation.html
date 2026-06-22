@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>creating qr codes and simple a website for an interactive art installation - dnilabs.com</title>
+    <script src="../blogs.js"></script>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>creating qr codes and simple a website for an interactive art installation</h1>
+        <p><time datetime="2018-04-07">2018-04-07</time></p>
+        <h2>obsolete :) doesnt work anymore</h2>
+        <p>A friend of mine, Patrick Fürli, is artists, he creates so called collage art, he takes pieces of magazine or paper, and rearranges them. He recently started creating animated gif files of his art and then he asked me: &quot;do you have any good idea how to play this gifs with music in an interactive art installation which i can afford?&quot;. He had some kind of big installation in mind with multiple monitors, speakers, raspberry pies and other stuff.</p>
+        <p>1 or 2 days later i saw a qr code and this idea hit me. what about just generating qr code which you can place next to the original pieces. people at the vernisage could then scan it with their smartphones, which takes you directly to a website where the animated gif and a looping mp3 starts. i told him the idea and he likes it.</p>
+        <p>so i started thinking about how could i make this little website so he could as simple as possible.</p>
+        <p>my plan</p>
+        <hr>
+        <ol>
+          <li>use github pages for free webhosting</li>
+          <li>pre generate qr codes with custom urls, ex. http://dni.github.io/#1</li>
+          <li>the artist can upload 1.gif and 1.mp3 via github as many as he wants</li>
+          <li>create a simple overview for all qr codes</li>
+          <li>create some javascript which handles the urls and changes the files</li>
+        </ol>
+        <p>qr codes</p>
+        <hr>
+        <ol>
+          <li>install the qr code nodejs module</li>
+        </ol>
+        <pre><code>npm i -g qrcode</code></pre>
+        <ol>
+          <li>pre generating arbritary mane qr codes as svg with this shell script</li>
+        </ol>
+        <pre><code>a=1
+        while [ $a -lt 101 ]
+        do
+           qrcode -o qr/$a.svg &quot;http://fuerli.dnilabs.com/#$a&quot;
+          a=`expr $a + 1`
+        done</code></pre>
+        <p>html &amp; css</p>
+        <hr>
+        <pre><code>  &lt;div id=&quot;contents&quot; style=&quot;display: none;&quot;&gt;&lt;/div&gt;
+          &lt;audio id=&quot;audio&quot; loop controls&gt;&lt;/audio&gt;
+          &lt;a id=&quot;back&quot; href=&quot;index.html&quot; onclick=&quot;timeout()&quot;&gt;Overview&lt;/a&gt;</code></pre>
+        <p>javascript</p>
+        <hr>
+        <p>future plans</p>
+        <hr>
+        <p>it's online, but for now there is only the first qr codes filled with sample data. but soon there should be more to see! one idea we had was to maybe implement a 1.txt with some metadata about the artwork.</p>
+        <p>you can view the source on <a href="https://github.com/dni/fuerli">github</a> and the live example of the <a href="http://fuerli.dnilabs.com/">overview page</a> and the example of the <a href="http://fuerli.dnilabs.com/#1">artwork page</a>, be careful the audio my scare you :).</p>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "../" + blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
+</body>
+</html>

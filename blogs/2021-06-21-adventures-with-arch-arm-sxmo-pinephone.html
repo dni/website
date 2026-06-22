@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>adventures with arch linux arm and sxmo on the pinephone - dnilabs.com</title>
+    <script src="../blogs.js"></script>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>adventures with arch linux arm and sxmo on the pinephone</h1>
+        <p><time datetime="2021-06-21">2021-06-21</time></p>
+        <h5>Introduction</h5>
+        <p>I just discovered SXMO for the Pinephone yesterday and im amazed by it, its excatly how i imagined myself using the Pinephone and even better. I decided to look deeper into it. First of all there is only a prebuilt image for SXMO using PostmarketOS, which is nice, but i really prefer Arch Linux ARM.</p>
+        <h4>first plan of attack</h4>
+        <p>is to get a prebuilt SXMO image into the <a href="https://github.com/dreemurrs-embedded/Pine64-Arch">Danctnix github repository</a>. there is a <a href="https://github.com/justinesmithies/sxmo-alarm">sxmo-alarm</a> with a nice script to install sxmo from the barebones image, but im not really satisfied with this.</p>
+        <h3>creating the sxmo PKGBUILDs for Arch ARM</h3>
+        <p>As seen here <a href="https://git.sr.ht/~mil/sxmo-build/tree/master/item/sxmo_build_all.sh">sxmo build all</a> there couple of packages needed for sxmo. i'm starting the progress of creating PKGBUILD files for them.</p>
+        <h5>build dependencies</h5>
+        <pre><code>sudo pacman -S binutils pkgconf fakeroot bc flex bison autoconf</code></pre>
+        <h5>starting off with a simple package sxmo-st</h5>
+        <p>this one was quite easy to do because sxmo developer proycon on irc sent me links to <a href="https://pkgs.alpinelinux.org/packages?name=sxmo*&amp;branch=edge">alpine linux repository</a> with all sxmo packages. they use very similar styled APKBUILD files for packaging as Arch, seen here in this sxmo-st <a href="https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/community/sxmo-st/APKBUILD">APKBUILD</a>. with some help of the <a href="https://wiki.alpinelinux.org/wiki/APKBUILD_Reference">APKBUILD reference</a>, <a href="https://wiki.archlinux.org/title/PKGBUILD">PKGBUILD reference</a> and <a href="https://wiki.archlinux.org/title/Creating_packages">Creating Packages Arch</a> i figured everything out and the only things i had to change were formatting and a couple of package names in makedepends and depends. i removed the line <a href="https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/community/sxmo-st/APKBUILD#L18">&quot;sed -i '/tic/d' Makefile&quot;i</a> from the prepare function and the <a href="https://gitlab.alpinelinux.org/alpine/aports/-/blob/master/community/sxmo-st/APKBUILD#L11">subpackages definition</a>, i guess alpine does this because they handle documentation differently.</p>
+        <pre><code># Maintainer: dni &lt;office@dnilabs.com&gt;
+        pkgname=sxmo-st
+        pkgver=0.8.3.4
+        pkgrel=0
+        pkgdesc=&quot;St fork for Sxmo UI; supports scrollback, invert, and other patches&quot;
+        arch=('x86_64' 'armv7h' 'aarch64')
+        url=&quot;https://git.sr.ht/~mil/sxmo-st&quot;
+        license=('MIT')
+        depends=('ncurses')
+        makedepends=('make' 'fontconfig' 'freetype2' 'libx11' 'libxext' 'libxft')
+        provides=('st')
+        source=(&quot;$pkgname-$pkgver.tar.gz::https://git.sr.ht/~mil/sxmo-st/archive/$pkgver.tar.gz&quot;)
+        sha512sums=('a4cb72680e070d1703c4359618fa7ed36d5460496ab1320025f89809d7fa5387a6f9aae1e1143b261e57ea5f49d9b71bb68dad7653538b0238d2e50259029190')
+        
+        build() {
+          cd &quot;$pkgname-$pkgver&quot;
+        	make
+        }
+        
+        package() {
+          cd &quot;$pkgname-$pkgver&quot;
+        	make install PREFIX=/usr DESTDIR=&quot;$pkgdir&quot;
+        	mkdir -p &quot;$pkgdir&quot;/usr/share/applications
+        	cat &gt; &quot;$pkgdir&quot;/usr/share/applications/st.desktop &lt;&lt;-EOF
+        		[Desktop Entry]
+        		Name=st
+        		Comment=st is a simple virtual terminal emulator for X which sucks less
+        		Exec=st
+        		Terminal=false
+        		Type=Application
+        		Icon=gnome-xterm
+        		Categories=System;TerminalEmulator;
+        	EOF
+        }</code></pre>
+        <h5>building the packages</h5>
+        <p>NOTE: sxmo isnt yet in Pine64-Arch repository so you need to create the below dir and put the PKGBUILD above inside there. for example:</p>
+        <pre><code>git clone https://github.com/dreemurrs-embedded/Pine64-Arch
+        cd Pine64-Arch/PKGBUILDS/sxmo/smxo-st/
+        makepkg -s</code></pre>
+        <h5>next PKGBUILD sxmo-dwm</h5>
+        <p>same as sxmo-st</p>
+        <pre><code># Maintainer: dni &lt;office@dnilabs.com&gt;
+        pkgname=sxmo-dwm
+        pkgver=6.2.12
+        pkgrel=0
+        pkgdesc=&quot;Dwm fork for Sxmo UI; supports volume-key hotkeys, swallow, keyboard, among other patches&quot;
+        arch=('x86_64' 'armv7h' 'aarch64')
+        url=&quot;https://git.sr.ht/~mil/sxmo-dwm&quot;
+        license=('MIT')
+        depends=('xorg-server')
+        makedepends=('make' 'freetype2' 'libx11' 'libxinerama' 'libxft')
+        provides=('dwm')
+        source=(&quot;$pkgname-$pkgver.tar.gz::https://git.sr.ht/~mil/sxmo-dwm/archive/$pkgver.tar.gz&quot;)
+        sha512sums=('842d93eb51204059e2f10c78dbf61f0239fef176d768b43a4d0b5f39a5ec452546e9fa77bc580a496f57f5a8f90a5576aa59a8964ffb0f86be2e454aec2b27c5')
+        
+        build() {
+          cd &quot;$pkgname-$pkgver&quot;
+        	make X11INC=/usr/include/X11 X11LIB=/usr/lib/X11 FREETYPEINC=/usr/include/freetype2
+        }
+        
+        package() {
+          cd &quot;$pkgname-$pkgver&quot;
+        	make PREFIX=/usr DESTDIR=&quot;$pkgdir&quot; install
+        }</code></pre>
+        <h2>PKGBUILDs done, whats next?</h2>
+        <p>After sieving through the sxmo-utils, i started thinking about the structure of sxmo and how the scripts are executed and loaded, which lead me into a journey of rethinking my own dotfiles, i'll talk about that in detail in my <a href="http://blog.dnilabs.com/2021/06/27/restructuring-dotfiles-rethinking-sxmo-structure.html">next blogpost</a>.</p>
+        <h2>Links</h2>
+        <ul>
+          <li><a href="https://github.com/dreemurrs-embedded/Pine64-Arch">Github Repository Arch ARM Danctnix</a></li>
+          <li><a href="https://github.com/dreemurrs-embedded/Pine64-Arch/releases">Arch ARM Danctnix Releases</a></li>
+          <li><a href="https://github.com/dreemurrs-embedded/Pine64-Arch/releases/download/20210613/archlinux-pinephone-barebone-20210613.img.xz">Current Barebones Arch ARM</a></li>
+          <li><a href="https://git.sr.ht/~mil/sxmo-build/tree/master/item/sxmo_build_all.sh">sxmo repository</a></li>
+          <li><a href="https://github.com/justinesmithies/sxmo-alarm">sxmo-alarm repository</a></li>
+          <li><a href="https://pkgs.alpinelinux.org/packages?name=sxmo*&amp;branch=edge">alpine os sxmo packages</a></li>
+          <li><a href="https://wiki.alpinelinux.org/wiki/APKBUILD_Reference">APKBUILD reference</a></li>
+          <li><a href="https://wiki.archlinux.org/title/PKGBUILD">PKGBUILD reference</a></li>
+          <li><a href="https://wiki.archlinux.org/title/Creating_packages">Creating Packages Arch</a></li>
+          <li><a href="http://blog.dnilabs.com/2021/06/27/restructuring-dotfiles-rethinking-sxmo-structure.html">next blogpost</a></li>
+          <li>Matrix: #archmobile:kde.org</li>
+          <li>IRC: #sxmo on irc.oftc.net</li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script>
+        const list = document.getElementById("blog-list");
+        window.blogs.forEach((blog) => {
+            const item = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = "../" + blog.url;
+            link.textContent = blog.title;
+            item.append(blog.date + " - ", link);
+            list.append(item);
+        });
+    </script>
+</body>
+</html>
