@@ -85,3 +85,20 @@ window.blogs = [
     "url": "blogs/2018-04-07-using-multiple-password-storages.html"
   }
 ];
+
+function renderBlogList() {
+  const list = document.getElementById("blog-list");
+  if (!list) return;
+
+  const prefix = window.location.pathname.includes("/blogs/") ? "../" : "";
+  window.blogs.forEach((blog) => {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = prefix + blog.url;
+    link.textContent = blog.title;
+    item.append(blog.date + " - ", link);
+    list.append(item);
+  });
+}
+
+renderBlogList();

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>building and setup of bitcoin core and lightning node on ubuntu server in aws ec2 - dnilabs.com</title>
-    <script src="../blogs.js"></script>
 </head>
 <body>
     <p><a href="../index.html">Home</a></p>
@@ -72,16 +71,6 @@
     <hr>
     <h2>Blog</h2>
     <ul id="blog-list"></ul>
-    <script>
-        const list = document.getElementById("blog-list");
-        window.blogs.forEach((blog) => {
-            const item = document.createElement("li");
-            const link = document.createElement("a");
-            link.href = "../" + blog.url;
-            link.textContent = blog.title;
-            item.append(blog.date + " - ", link);
-            list.append(item);
-        });
-    </script>
+    <script src="../blogs.js"></script>
 </body>
 </html>
