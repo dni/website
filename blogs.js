@@ -22,7 +22,7 @@ window.blogs = [
     "url": "blogs/2026-06-22-qubesos-how-to-not-get-hacked-when-developing.html"
   },
   {
-    "title": "Boltz web app",
+    "title": "The joy of the Boltz web app',
     "date": "2023-02-19",
     "categories": [
       "bitcoin",
@@ -31,6 +31,17 @@ window.blogs = [
       "web"
     ],
     "url": "blogs/2023-02-19-boltz-web-app.html"
+  },
+  {
+    "title": "lnurl and bolt11 libraries",
+    "date": "2023-02-11",
+    "categories": [
+      "bitcoin",
+      "lightning",
+      "lnbits",
+      "python"
+    ],
+    "url": "blogs/2023-02-11-lnurl-and-bolt11.html"
   },
   {
     "title": "building and setup of bitcoin core and lightning node on ubuntu server in aws ec2",

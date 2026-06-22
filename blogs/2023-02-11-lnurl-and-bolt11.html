@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>lnurl and bolt11 libraries</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>lnurl and bolt11 libraries</h1>
+        <p><time datetime="2023-02-11">2023-02-11</time></p>
+
+        <h2>introduction</h2>
+        <p>around this time i started working more on the small python libraries around LNbits: <a href="https://github.com/lnbits/lnurl">lnbits/lnurl</a> and <a href="https://github.com/lnbits/bolt11">lnbits/bolt11</a>.</p>
+
+        <p>they are not flashy projects, but they are the kind of libraries that everything else quietly depends on. if invoice parsing, LNURL handling, validation, typing, packaging or release workflows are wrong, the apps built on top get annoying very quickly.</p>
+
+        <h2>bolt11</h2>
+        <p>with <code>bolt11</code> the work was mostly about making lightning invoices easier and safer to deal with from python. i worked on the encoder and decoder, route hints, feature bits, fallback addresses, validation, a small cli, tests, pyright, ruff, packaging and release chores.</p>
+
+        <p>later fixes were about backwards compatibility, expiry handling, dependency changes, and moving away from older crypto dependencies. boring things, but important things.</p>
+
+        <h2>lnurl</h2>
+        <p>with <code>lnurl</code> the work was broader. there was tooling cleanup, exports, lnaddress support, lnurlauth, withdraw execution, async requests, timeouts, user agents, pydantic v2, tor fetching, and a lot of version and compatibility work.</p>
+
+        <p>i also kept coming back to it whenever LNbits or an extension found a weird edge case. that is the normal life of a protocol library: implement the happy path, then slowly learn all the strange things clients and servers do in the wild.</p>
+
+        <h2>maintaining</h2>
+        <p>a lot of the work was maintenance. updating dependencies, fixing CI, adding typing checks, keeping releases working, preserving backwards compatibility, and reacting when another project broke because the library was a little too strict or not strict enough.</p>
+
+        <p>maintaining small protocol libraries is mostly about not surprising users. old code should keep working, new edge cases should be handled, and releases should be boring. that was the goal.</p>
+
+        <h2>why it mattered</h2>
+        <p>LNbits has many extensions and integrations. having small reusable libraries for invoices and LNURL meant less duplicated code, better tests, and fewer slightly different implementations spread across projects.</p>
+
+        <p>this work also helped later projects like LNURL-pay extensions, hosted LNbits services, and wallet flows where users paste invoices, fetch LNURLs, or expect lightning addresses to just work.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/lnbits/lnurl">lnbits/lnurl</a></li>
+          <li><a href="https://github.com/lnbits/bolt11">lnbits/bolt11</a></li>
+          <li><a href="https://github.com/lnbits/lnurl/commit/7cffcb9c24521d429d2fb275d236d13690e79325">first lnurl commit i found</a></li>
+          <li><a href="https://github.com/lnbits/bolt11/commit/540b4062dda01ff2338ef6cd3ab28957dba71880">first bolt11 commit i found</a></li>
+          <li><a href="https://github.com/lnbits/bolt11/commit/0e1f88030c4f336c8cec32f00ac0f037f37594ae">bolt11 validation and encode cli</a></li>
+          <li><a href="https://github.com/lnbits/lnurl/commit/10cb8a21f9197cce5610c24e1ccc4e828a796a56">lnurl auth support</a></li>
+          <li><a href="https://github.com/lnbits/lnurl/commit/bb52d773fd6df5d1c50b512fe40ce587ef4f24cd">tor support for lnurl fetching</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>
