@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QubesOS, how to not get hacked when developing - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>QubesOS, how to not get hacked when developing</h1>
+        <p><time datetime="2026-06-22">2026-06-22</time></p>
+
+        <h2>introduction</h2>
+        <p>developing means running a lot of code i did not write: dependencies, build scripts, containers, npm packages, python packages. with the ongoing supply chain attacks in 2026 this became more and more troublesome. even with a yubikey and an encrypted password store, running untrusted code became a very serious risk. so i decided i had to do something about it.</p>
+
+        <h2>QubesOS</h2>
+        <p>after hearing a lot of good things about <a href="https://www.qubes-os.org/">QubesOS</a>, and seeing the ongoing attacks, i finally had the motivation to jump in and improve my security. i am currently running the i3 window manager and the archlinux community template.</p>
+
+        <h2>my setup</h2>
+        <ul>
+          <li><code>personal</code> for normal browsing, chat and memes</li>
+          <li><code>work</code> for writing code and using ai agents</li>
+          <li><code>vault</code> where the yubikey is connected for ssh and gpg keys</li>
+          <li><code>ssh</code> only for ssh connections, firewalled to the ssh port, using Qubes.SshAgent policies from vault</li>
+          <li><code>pass</code> for password storage, firewalled to the git repo, using Qubes.GpgAgent policies from vault</li>
+          <li><code>git</code> for cloning, signing and committing, using Qubes.Git policies for the work qube, firewalled to github</li>
+          <li><code>disposable</code> qubes for opening random files and links</li>
+        </ul>
+
+        <p>the important part is that the risky stuff does not live next to the valuable stuff. if a build script does something bad, it should only hurt the qube where i ran it.</p>
+
+        <h2>development workflow</h2>
+        <p>i keep repositories in a git qube and clone them into the work qube with <code>qubes-git-remote</code>. gpg and ssh keys stay in the vault and are not just sitting in every environment where code can execute.</p>
+
+        <p>it is not magic and it does not remove the need to think. but it changes the failure mode. one mistake should not immediately mean that my whole machine, browser session, keys and projects are gone.</p>
+
+        <h2>conclusion</h2>
+        <p>QubesOS is slower and more work than a normal linux desktop, but for development it is worth it to me. it gives me a clear place to put risk, and that makes working on unknown code feel sane again.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://www.qubes-os.org/">QubesOS</a></li>
+          <li><a href="https://doc.qubes-os.org/en/latest/user/security-in-qubes/split-gpg-2.html">QubesOS Split GPG-2 documentation</a></li>
+          <li><a href="https://forum.qubes-os.org/t/split-ssh/19060">QubesOS Forum: Split SSH</a></li>
+          <li><a href="https://deniszanin.com/using-split-ssh-gpg-in-qubes-os/">Denis Zanin: Using Split-SSH in Qubes 4</a></li>
+          <li><a href="https://github.com/henn/qubes-app-split-ssh">Jason Hennessey: qubes-app-split-ssh</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>

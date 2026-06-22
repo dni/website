@@ -1,5 +1,16 @@
 window.blogs = [
   {
+    "title": "QubesOS, how to not get hacked when developing",
+    "date": "2026-06-22",
+    "categories": [
+      "linux",
+      "security",
+      "development",
+      "qubesos"
+    ],
+    "url": "blogs/2026-06-22-qubesos-how-to-not-get-hacked-when-developing.html"
+  },
+  {
     "title": "building and setup of bitcoin core and lightning node on ubuntu server in aws ec2",
     "date": "2022-01-23",
     "categories": [],
