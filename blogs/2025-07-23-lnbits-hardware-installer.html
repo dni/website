@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>lnbits hardware installer - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>lnbits hardware installer</h1>
+        <p><time datetime="2025-07-23">2025-07-23</time></p>
+
+        <h2>introduction</h2>
+        <p>in 2025 i worked on the <a href="https://github.com/lnbits/hardware-installer">LNbits hardware installer</a>. the idea was simple: make flashing and configuring LNbits-related hardware less annoying.</p>
+
+        <p>hardware projects often fail at the boring step before the fun starts. users need firmware, the right device mode, maybe a display option, and some configuration. if that process is confusing, people never get to the actual project.</p>
+
+        <h2>what i worked on</h2>
+        <p>i simplified the installer flow, added a new boot mode, fixed static page deployment, updated the frontend build setup, and worked on building and releasing firmware for multiple devices.</p>
+
+        <p>later fixes were about small but important things: allowing devices without configuration options, fixing the generic installer name, and making firmware upload work again.</p>
+
+        <h2>why it mattered</h2>
+        <p>this kind of tool is glue. it is not the device, not the firmware, and not LNbits itself, but it decides whether someone can actually install the thing without giving up.</p>
+
+        <p>the goal was to make the path from browser to flashed device shorter and less fragile.</p>
+
+        <h2>future ideas</h2>
+        <p>one idea i still like is a dedicated <code>hardware.lnbits.com</code> repository, similar to <a href="https://github.com/lnbits/lnbits-extensions">lnbits/lnbits-extensions</a>, but for hardware projects.</p>
+
+        <p>hardware projects could publish releases there, and the frontend could list them, show device-specific options, install firmware, and flash supported devices directly from the browser. one place for all LNbits hardware projects, releases and installers.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/lnbits/hardware-installer">lnbits/hardware-installer</a></li>
+          <li><a href="https://github.com/lnbits/hardware-installer/commit/aa42873218b7ba03423895b5ca78a364e5c29f2e">simplify hardware installer and new bootmode</a></li>
+          <li><a href="https://github.com/lnbits/hardware-installer/commit/fa8c713d0e9b18fa8fc98a1c02dcbf2182a2dc6c">build and release multiple devices and optional tft</a></li>
+          <li><a href="https://github.com/lnbits/hardware-installer/commit/de6f49ea1bf4fd3db03ba5c8c8246c69e7f3ee89">allow no configuration options</a></li>
+          <li><a href="https://github.com/lnbits/hardware-installer/commit/c30aa8bf6adbc9a79396fa5e6c96ab7a9ae2b7d3">fix firmware upload</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>

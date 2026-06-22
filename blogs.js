@@ -22,6 +22,17 @@ window.blogs = [
     "url": "blogs/2026-06-22-qubesos-how-to-not-get-hacked-when-developing.html"
   },
   {
+    "title": "lnbits hardware installer",
+    "date": "2025-07-23",
+    "categories": [
+      "lnbits",
+      "hardware",
+      "installer",
+      "bitcoin"
+    ],
+    "url": "blogs/2025-07-23-lnbits-hardware-installer.html"
+  },
+  {
     "title": "The joy of the Boltz web app",
     "date": "2023-02-19",
     "categories": [
