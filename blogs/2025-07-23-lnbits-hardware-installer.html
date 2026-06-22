@@ -13,17 +13,17 @@
         <h2>introduction</h2>
         <p>in 2025 i worked on the <a href="https://github.com/lnbits/hardware-installer">LNbits hardware installer</a>. the idea was simple: make flashing and configuring LNbits-related hardware less annoying.</p>
 
-        <p>hardware projects often fail at the boring step before the fun starts. users need firmware, the right device mode, maybe a display option, and some configuration. if that process is confusing, people never get to the actual project.</p>
+        <p>hardware projects need a reliable install path: firmware, device mode, display options, and configuration should be clear before users start flashing.</p>
 
         <h2>what i worked on</h2>
-        <p>i simplified the installer flow, added a new boot mode, fixed static page deployment, updated the frontend build setup, and worked on building and releasing firmware for multiple devices.</p>
+        <p>i simplified the installer flow, added a new boot mode, fixed static deployment, updated the frontend build, and added release builds for multiple devices.</p>
 
-        <p>later fixes were about small but important things: allowing devices without configuration options, fixing the generic installer name, and making firmware upload work again.</p>
+        <p>i also fixed device configs, the generic installer name, and firmware uploads.</p>
 
         <h2>why it mattered</h2>
-        <p>this kind of tool is glue. it is not the device, not the firmware, and not LNbits itself, but it decides whether someone can actually install the thing without giving up.</p>
+        <p>the installer is the first real user experience for the hardware. if it fails, the project fails before the device is even running.</p>
 
-        <p>the goal was to make the path from browser to flashed device shorter and less fragile.</p>
+        <p>the goal was a shorter and more reliable path from browser to flashed device.</p>
 
         <h2>future ideas</h2>
         <p>one idea i still like is a dedicated <code>hardware.lnbits.com</code> repository, similar to <a href="https://github.com/lnbits/lnbits-extensions">lnbits/lnbits-extensions</a>, but for hardware projects.</p>
