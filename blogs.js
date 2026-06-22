@@ -1,5 +1,16 @@
 window.blogs = [
   {
+    "title": "devlog, first half of 2026",
+    "date": "2026-06-22",
+    "categories": [
+      "github",
+      "lnbits",
+      "bitcoin",
+      "work"
+    ],
+    "url": "blogs/2026-06-22-devlog.html"
+  },
+  {
     "title": "QubesOS, how to not get hacked when developing",
     "date": "2026-06-22",
     "categories": [

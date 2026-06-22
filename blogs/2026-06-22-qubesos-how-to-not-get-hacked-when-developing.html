@@ -16,13 +16,15 @@
         <h2>QubesOS</h2>
         <p>after hearing a lot of good things about <a href="https://www.qubes-os.org/">QubesOS</a>, and seeing the ongoing attacks, i finally had the motivation to jump in and improve my security. i am currently running the i3 window manager and the archlinux community template.</p>
 
+        <p>the two ideas that made it click for development were split-gpg and split-ssh: keep the keys in a trusted qube, and let less trusted qubes ask for signing or ssh access through explicit Qubes policies.</p>
+
         <h2>my setup</h2>
         <ul>
           <li><code>personal</code> for normal browsing, chat and memes</li>
           <li><code>work</code> for writing code and using ai agents</li>
           <li><code>vault</code> where the yubikey is connected for ssh and gpg keys</li>
-          <li><code>ssh</code> only for ssh connections, firewalled to the ssh port, using Qubes.SshAgent policies from vault</li>
-          <li><code>pass</code> for password storage, firewalled to the git repo, using Qubes.GpgAgent policies from vault</li>
+          <li><code>ssh</code> only for ssh connections, firewalled to the ssh port, using split-ssh with Qubes.SshAgent policies from vault</li>
+          <li><code>pass</code> for password storage, firewalled to the git repo, using split-gpg with Qubes.GpgAgent policies from vault</li>
           <li><code>git</code> for cloning, signing and committing, using Qubes.Git policies for the work qube, firewalled to github</li>
           <li><code>disposable</code> qubes for opening random files and links</li>
         </ul>

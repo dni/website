@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>devlog, first half of 2026 - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>devlog, first half of 2026</h1>
+        <p><time datetime="2026-06-22">2026-06-22</time></p>
+
+        <h2>introduction</h2>
+        <p>the first half of 2026 is not fully over yet, but i wanted to write down what i worked on so far. i looked through my public github activity from january until today, and it is mostly a mix of LNbits maintenance, 600 project work, and a few small personal tools.</p>
+
+        <p>github commit search shows 256 public commits from my account in this period. the biggest chunks were <a href="https://github.com/lnbits/lnbits">lnbits/lnbits</a>, <a href="https://github.com/600-000-000-000/600-party">600-party</a>, <a href="https://github.com/600-000-000-000/600000000000">600000000000</a>, and <a href="https://github.com/dni/vanity-sh">vanity-sh</a>.</p>
+
+        <h2>LNbits</h2>
+        <p>LNbits was still the main open source work. on <a href="https://github.com/lnbits/lnbits">lnbits/lnbits</a> i worked on releases, CI, dependencies, docker images, payment code, settings, tests, and a bunch of fixes around wallets and invoices.</p>
+
+        <p>some things i touched were the v1.5.x release flow, moving more tooling to uv, pyright fixes, docker image changes, onchain/electrum utilities, cached exchange rates, and listener behavior for internal and external invoices.</p>
+
+        <p>outside core LNbits i also worked on extensions and related packages: <a href="https://github.com/lnbits/lnurl">lnurl</a>, <a href="https://github.com/lnbits/bolt11">bolt11</a>, <a href="https://github.com/lnbits/lnurlp">lnurlp</a>, <a href="https://github.com/lnbits/boltz">boltz</a>, <a href="https://github.com/lnbits/events">events</a>, <a href="https://github.com/lnbits/satspay">satspay</a>, and the new <a href="https://github.com/lnbits/lnbits-price-aggregator">lnbits-price-aggregator</a>.</p>
+
+        <h2>600</h2>
+        <p>the other big chunk was the 600 stuff. i did a lot on <a href="https://github.com/600-000-000-000/600000000000">600000000000</a> and <a href="https://github.com/600-000-000-000/600-party">600-party</a>: pages, styles, party details, nostr files, tor links, business cards, QR code assets, a signal page, and a lot of small content updates.</p>
+
+        <p>this was less library work and more website/product/event work. lots of small commits, lots of iteration, and the kind of polish that only happens when something is actually going to be used.</p>
+
+        <h2>small tools</h2>
+        <p>i also worked on smaller personal projects. <a href="https://github.com/dni/vanity-sh">vanity-sh</a> got a good amount of commits. <a href="https://github.com/dni/geoseed">geoseed</a>, <a href="https://dnilabs.com">dnilabs.com</a>, dotfiles, scripts, a fastapi dynamic routes proof of concept, and a timelock wallet also got some attention.</p>
+
+        <p>for dnilabs.com i also moved the old blog into the main website, generated the blog overview from <code>blogs.js</code>, and archived the separate blog repository.</p>
+
+        <h2>reviews and maintenance</h2>
+        <p>the recent activity feed also shows a lot of review and maintenance work, especially around LNbits. in the last public events github returned, there were pull request reviews, merged PRs, reopened PRs, issue comments, branch cleanup, and extension release work.</p>
+
+        <p>that part is harder to summarize than commits, but it is important. keeping projects alive is not only writing new code. it is reviewing, releasing, cleaning up, fixing small regressions, and making sure the next person can keep moving.</p>
+
+        <h2>conclusion</h2>
+        <p>so far 2026 was mostly LNbits, 600, and security-minded personal infrastructure. not a clean theme, but it feels like the right mix: bitcoin tools, web things, events, and making my own setup better.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/dni">github.com/dni</a></li>
+          <li><a href="https://github.com/search?q=author%3Adni+committer-date%3A2026-01-01..2026-06-30&type=commits">github commit search for 2026 H1</a></li>
+          <li><a href="https://github.com/lnbits/lnbits">lnbits/lnbits</a></li>
+          <li><a href="https://github.com/600-000-000-000/600000000000">600-000-000-000/600000000000</a></li>
+          <li><a href="https://github.com/600-000-000-000/600-party">600-000-000-000/600-party</a></li>
+          <li><a href="https://github.com/dni/vanity-sh">dni/vanity-sh</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>
