@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LNURLcash: bearer assets with LUD-25 - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>LNURLcash: bearer assets with LUD-25</h1>
+        <p><time datetime="2026-08-10">2026-08-10</time></p>
+
+        <h2>introduction</h2>
+        <p>i've spent a lot of time in the <a href="https://github.com/lnurl/luds">lnurl/luds</a> spec repo, and one of the drafts i wrote there is <a href="https://github.com/lnurl/luds/blob/luds/25.md">LUD-25, "LNURLcash, Bearer assets"</a> (open as <a href="https://github.com/lnurl/luds/pull/301">PR #301</a>). this post is about what it actually does, and about two small projects, <a href="https://github.com/dni/lnurl-wallet">lnurl-wallet</a> and <a href="https://github.com/dni/lnurl-mint">lnurl-mint</a>, that implement it end to end.</p>
+
+        <h2>the idea</h2>
+        <p>an <a href="https://github.com/lnurl/luds/blob/luds/03.md">LUD-03 withdraw</a> link is redeemable by anyone who holds a valid <code>k1</code>. that's already a bearer property, LNURLcash just takes it seriously: instead of treating <code>k1</code> as a one-time ticket that gets exchanged for a BOLT-11 invoice and thrown away, a service can credit a <code>k1</code> with value and let it <em>be</em> the asset. it can be copied, printed, NFC-tapped, or handed to someone else exactly like a banknote, and it can be re-issued, merged, or split into change, all without the holder needing to be online.</p>
+
+        <p>the clever part is that this needs no new endpoint and no new encoding. a bearer note is nothing more than a normal <code>lnurlw://</code> withdraw link:</p>
+
+        <pre><code>lnurlw://mint.example/withdraw?k1=&lt;secret&gt;&amp;amount=&lt;msat&gt;</code></pre>
+
+        <p>a service that implements LNURLcash is still speaking plain LUD-03. a wallet that has never heard of LNURLcash still sees an ordinary withdraw link, and can cash it straight out to a BOLT-11 invoice like it always could. the extension is fully optional and backward-compatible in both directions.</p>
+
+        <h2>minting</h2>
+        <p>notes come into existence through an ordinary <a href="https://github.com/lnurl/luds/blob/luds/06.md">LUD-06 payRequest</a>. a payLink can advertise a <code>withdrawLink</code> pointing at its own withdraw endpoint, one that recognizes the payment preimages of invoices it issued. pay the invoice, and the preimage you get back <em>is</em> a valid <code>k1</code> at that endpoint, credited with the amount you paid (minus an optional, advertised mint fee). no separate minting call, the payment itself is the mint.</p>
+
+        <h2>redeeming: melt, rotate, split, merge</h2>
+        <p>everything happens against the <code>callback</code> url from the withdraw JSON. the informational GET on the note's own LNURL is purely read-only and never burns anything, which is what keeps legacy wallets safe. what the callback does depends on which parameters show up together:</p>
+
+        <ul>
+          <li><code>k1</code> + <code>pr</code> &mdash; <strong>melt</strong>: plain LUD-03 behaviour, the note is burned and the invoice gets paid</li>
+          <li><code>k1</code> alone &mdash; <strong>rotate</strong>: the note is burned and a fresh one of the same value replaces it</li>
+          <li><code>k1</code> + <code>amount</code> &mdash; <strong>split</strong>: burned, two new notes come back, one for <code>amount</code>, one for the remainder</li>
+          <li>several <code>k1</code>s &mdash; <strong>merge</strong>: all burned, one note worth their sum comes back</li>
+        </ul>
+
+        <p>melting is asynchronous the way LUD-03 already is: the service marks the note pending, returns <code>OK</code>, and only burns it once the outgoing payment actually settles, restoring it otherwise. any other operation on a pending note is rejected until that resolves.</p>
+
+        <h2>offline circulation and verification</h2>
+        <p>because a note is self-contained, holders can hand it to each other with zero connectivity to the issuing service, an NFC tap or a QR code is enough. the catch is that a bare <code>(k1, amount)</code> pair proves nothing on its own, a forged secret with an inflated amount looks identical to a real note until someone actually asks the service. LUD-25 closes that gap with an optional signature: the service publishes a <code>mintPubkey</code> and signs each freshly rotated/split/merged note the same way <a href="https://github.com/lnurl/luds/blob/luds/13.md">LUD-13</a> already signs its auth seed phrase, via the node's own <code>signmessage</code>. a recipient can then verify issuer and amount offline, before deciding whether to trust the person handing it over. it still can't prove a note hasn't already been spent elsewhere, that only an online rotate settles for good.</p>
+
+        <h2>lnurl-wallet</h2>
+        <p><a href="https://github.com/dni/lnurl-wallet">lnurl-wallet</a> is a serverless reference wallet for LNURLcash notes, a single static page with no backend and no accounts, deployed to GitHub Pages and hosted at <a href="https://dni.github.io/lnurl-wallet">dni.github.io/lnurl-wallet</a>. everything lives AES-256-GCM encrypted in local storage, keyed off a linking key derived from a BIP39 seed phrase the same way <a href="https://github.com/dni/lnurl_server">lnurl_server</a> derives its LUD-05 identities. it talks directly to whatever mint issued a note, follows the spec's security guidance to the letter, rotating received and freshly minted notes immediately rather than sitting on a secret the previous holder (or the mint's own node) also saw, and shows a "signed" badge when a note's signature checks out against a known <code>mintPubkey</code>. built with Vite, SolidJS, and <code>@scure</code>/<code>@noble</code>.</p>
+
+        <h2>lnurl-mint</h2>
+        <p><a href="https://github.com/dni/lnurl-mint">lnurl-mint</a> is the other half, a minimal FastAPI backend that implements the spec against a real Lightning node (lnd or cln). it exposes the payRequest/withdrawRequest pair, mint fees, LUD-21 verify, offline verification via the node's own signing RPC, and Tor support that swaps the advertised base URL for a wallet actually connecting over an onion address. it only ever stores <code>sha256(k1)</code> for outstanding notes, never the secret itself, and disables per-request access logging entirely so a bearer secret never ends up sitting in a log file. it's the sibling of lnurl_server with everything stripped away except the mint.</p>
+
+        <p>the two projects track the spec closely enough to interoperate, down to tolerating a byte-order quirk in how lnurl-mint currently emits recoverable signatures, exactly the kind of small real-world mismatch you only find by actually running two independent implementations against each other.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/lnurl/luds/blob/luds/25.md">LUD-25: LNURLcash, Bearer assets</a></li>
+          <li><a href="https://github.com/lnurl/luds/pull/301">LUD-25 draft PR</a></li>
+          <li><a href="https://github.com/lnurl/luds/blob/luds/03.md">LUD-03: withdrawRequest base spec</a></li>
+          <li><a href="https://github.com/lnurl/luds/blob/luds/06.md">LUD-06: payRequest base spec</a></li>
+          <li><a href="https://github.com/dni/lnurl-wallet">dni/lnurl-wallet</a>, hosted at <a href="https://dni.github.io/lnurl-wallet">dni.github.io/lnurl-wallet</a></li>
+          <li><a href="https://github.com/dni/lnurl-mint">dni/lnurl-mint</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>

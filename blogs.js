@@ -1,5 +1,16 @@
 window.blogs = [
   {
+    "title": "LNURLcash: bearer assets with LUD-25",
+    "date": "2026-08-10",
+    "categories": [
+      "bitcoin",
+      "lightning",
+      "lnurl",
+      "spec"
+    ],
+    "url": "blogs/2026-08-10-lnurlcash-lud-25.html"
+  },
+  {
     "title": "devlog, first half of 2026",
     "date": "2026-06-22",
     "categories": [
