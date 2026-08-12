@@ -1,5 +1,17 @@
 window.blogs = [
   {
+    "title": "cln-tui: a terminal UI for Core Lightning",
+    "date": "2026-08-12",
+    "categories": [
+      "bitcoin",
+      "lightning",
+      "cln",
+      "tui",
+      "go"
+    ],
+    "url": "blogs/2026-08-12-cln-tui.html"
+  },
+  {
     "title": "LNURLcash: bearer assets with LUD-25",
     "date": "2026-08-10",
     "categories": [

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>cln-tui: a terminal UI for Core Lightning - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>cln-tui: a terminal UI for Core Lightning</h1>
+        <p><time datetime="2026-08-12">2026-08-12</time></p>
+
+        <h2>introduction</h2>
+        <p><a href="https://github.com/dni/cln-tui">cln-tui</a> is a terminal interface for <a href="https://github.com/ElementsProject/lightning">Core Lightning</a>. it talks straight to <code>lightningd</code> over its RPC socket, no REST plugin, no gRPC plugin, no extra process to keep alive alongside the node. just a Go binary and a Unix socket.</p>
+
+        <p>i wanted something i could ssh into a node and immediately see what's going on: peers, channels, invoices, payments, without reaching for <code>lightning-cli</code> and piping everything through <code>jq</code>.</p>
+
+        <h2>how it's built</h2>
+        <p>it's written in Go using <a href="https://github.com/jroimartin/gocui">gocui</a> for the terminal UI, with a JSON-RPC client that talks to <code>lightning-rpc</code> directly and typed wrappers around the CLN RPC methods it needs. no separate daemon, no lnd-style REST layer, it's just another client of the same socket <code>lightning-cli</code> uses.</p>
+
+        <p>the interface is split into eight panels: Wallet, Peers, Channels, Invoices, Forwards, Payments, Offers, and the network graph. the layout is accordion-style, three panels expanded at once (whichever is focused plus its neighbors), with jump keys <code>1</code>-<code>8</code> for going straight to any of them. <code>Tab</code> cycles focus, <code>j</code>/<code>k</code> or the arrow keys move the selection, <code>/</code> fuzzy-searches, <code>r</code> refreshes, and <code>?</code> pulls up help scoped to whatever panel you're in.</p>
+
+        <p>panel-specific actions follow what you'd expect from each screen: <code>o</code> opens a channel, <code>x</code> closes one, <code>n</code> creates a new invoice or offer, <code>p</code>/<code>x</code> handle payments, and <code>y</code> copies whatever's selected to the clipboard. destructive actions like closing a channel or withdrawing funds ask for confirmation first.</p>
+
+        <h2>staying responsive on a real node</h2>
+        <p>the annoying part of any CLN UI is that some calls are just slow, <code>listnodes</code> against the gossip graph on a well-connected node can take a while and there's no reason the rest of the UI should freeze while it runs. cln-tui fetches gossip data in the background and lets you keep working in the other panels while it loads.</p>
+
+        <p>first connection shows a progress bar while the initial dataset is pulled; later launches reuse cached data so you're not staring at a blank screen every time you ssh in. Invoices, Payments, and Forwards only ever render and cache their most recent 300 entries, newest first, which keeps things fast on nodes that have been routing for a long time and have thousands of records to page through.</p>
+
+        <h2>getting it running</h2>
+        <p>it's a straight <code>go build -o cln-tui .</code>, then run <code>./cln-tui</code>. by default it looks for the RPC socket at <code>~/.lightning/bitcoin/lightning-rpc</code>, but the path and the auto-refresh interval are both overridable via flags or environment variables, useful if your node lives in a container or a non-default data dir.</p>
+
+        <p>for development there's a Docker-based regtest environment in the repo, so changes can be tested against a live bitcoind and lightningd instead of just against mocks, plus CI workflows for tests and cross-platform release builds for Linux, macOS, and Windows.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/dni/cln-tui">dni/cln-tui</a></li>
+          <li><a href="https://github.com/ElementsProject/lightning">ElementsProject/lightning</a> (Core Lightning)</li>
+          <li><a href="https://github.com/jroimartin/gocui">jroimartin/gocui</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>
