@@ -1,5 +1,38 @@
 window.blogs = [
   {
+    "title": "taproot-lean: proving BIP340 batch verification",
+    "date": "2026-10-29",
+    "categories": [
+      "bitcoin",
+      "taproot",
+      "lean",
+      "cryptography"
+    ],
+    "url": "blogs/2026-10-29-taproot-lean-batch-verify.html"
+  },
+  {
+    "title": "devlog, Q3 2026",
+    "date": "2026-10-29",
+    "categories": [
+      "github",
+      "lnurlcash",
+      "bitcoin",
+      "work"
+    ],
+    "url": "blogs/2026-10-29-devlog-q3-2026.html"
+  },
+  {
+    "title": "LNURLcash: LUD-25 and LUD-26, and everything around it",
+    "date": "2026-10-29",
+    "categories": [
+      "bitcoin",
+      "lightning",
+      "lnurl",
+      "spec"
+    ],
+    "url": "blogs/2026-10-29-lnurlcash-lud-25-26.html"
+  },
+  {
     "title": "cln-tui: a terminal UI for Core Lightning",
     "date": "2026-08-12",
     "categories": [

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>devlog, Q3 2026 - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>devlog, Q3 2026</h1>
+        <p><time datetime="2026-10-29">2026-10-29</time></p>
+
+        <h2>introduction</h2>
+        <p>after the <a href="2026-06-22-devlog.html">first half of 2026</a> devlog i wanted to keep doing this, so here is the third quarter, july until september. again i looked through my public github activity, and this time there is a clear theme: LNURLcash.</p>
+
+        <p>github commit search shows 788 public commits from my account in Q3, about three times the whole first half. the biggest chunks were <a href="https://github.com/lnurlcash/lnurl-wallet">lnurl-wallet</a>, <a href="https://github.com/BIMbeamFLX/bearlett">bearlett</a>, <a href="https://github.com/lnurlcash/lnurl-mint">lnurl-mint</a> and <a href="https://github.com/dni/lnurl-server">lnurl-server</a>.</p>
+
+        <h2>LNURLcash</h2>
+        <p>most of the quarter went into <a href="https://github.com/lnurl/luds/pull/301">LUD-25</a>, bearer notes on top of LNURL-withdraw. it started in july as a draft plus two small projects, a wallet and a mint, and by the end of september it was a github org with around twenty repos.</p>
+
+        <p><a href="https://github.com/lnurlcash/lnurl-wallet">lnurl-wallet</a> alone got well over 250 commits and <a href="https://github.com/lnurlcash/lnurl-mint">lnurl-mint</a> about 110. in august the spec got a serious review from people building their own implementations, in september the whole thing was rewritten around taproot output keys, and at the end of september the HD derivation and Lightning Address part was split into its own LUD-26. i wrote a separate post about all of that: <a href="2026-10-29-lnurlcash-lud-25-26.html">LNURLcash: LUD-25 and LUD-26, and everything around it</a>.</p>
+
+        <p>around the spec a lot of smaller things appeared: <a href="https://github.com/lnurlcash/lnurlcash-core">lnurlcash-core</a> in rust, client libraries for typescript, python, go and kotlin, a conformance suite, a <code>libbitcoinkernel</code> wrapper (<a href="https://github.com/lnurlcash/kernel">kernel</a>), a DLC <a href="https://github.com/lnurlcash/oracle">oracle</a>, a <a href="https://github.com/lnurlcash/cln-mint">Core Lightning mint plugin</a>, the <a href="https://github.com/lnurlcash/raffle">raffle</a> ticket generator and the <a href="https://github.com/lnurlcash/lnurlcash.com">lnurlcash.com</a> website.</p>
+
+        <h2>bearlett</h2>
+        <p>the second biggest repo was <a href="https://github.com/BIMbeamFLX/bearlett">bearlett</a>, a bearer asset wallet for LNURLcash and Cashu, with independent wallet and notes napplets. over 200 commits. it's nice to see bearer notes show up next to Cashu in a wallet that isn't mine.</p>
+
+        <h2>lnurl-server</h2>
+        <p><a href="https://github.com/dni/lnurl-server">lnurl-server</a> got about 100 commits. it's an LNURL server that tries to implement all the LUDs, something you run for yourself or friends and family. it is also where the LUD-05 style derivation that LNURLcash reuses was tried out first.</p>
+
+        <h2>hardware</h2>
+        <p>i also got back into ESP32 stuff. <a href="https://github.com/lnurlcash/lnurl-vault">lnurl-vault</a> is a T-Display S3 companion for the wallet that generates secrets and stores notes, and <a href="https://github.com/lnurlcash/lnurl-card">lnurl-card</a> is a design for a credit-card-shaped lightning device: eInk, NFC, a 4&times;4 keypad, USB-C and no battery.</p>
+
+        <h2>LNbits and lnurl specs</h2>
+        <p>LNbits got less of my time than in the first half, but it didn't stop. there were commits on <a href="https://github.com/lnbits/lnbits">lnbits/lnbits</a>, <a href="https://github.com/lnbits/lnurl">lnurl</a>, <a href="https://github.com/lnbits/satspay">satspay</a>, <a href="https://github.com/lnbits/electrum-client">electrum-client</a>, <a href="https://github.com/lnbits/watchonly">watchonly</a> and the <a href="https://github.com/lnbits/lnbits-price-aggregator">price aggregator</a>.</p>
+
+        <p>on <a href="https://github.com/lnurl/luds">lnurl/luds</a> i opened the LUD-25/26 PR, got a small LUD-03 zero balance recommendation <a href="https://github.com/lnurl/luds/pull/302">merged</a>, and proposed <a href="https://github.com/lnurl/luds/pull/312">POST callbacks</a>.</p>
+
+        <h2>small tools</h2>
+        <p><a href="https://github.com/dni/cln-tui">cln-tui</a>, a terminal UI for Core Lightning, got its first release and its own <a href="2026-08-12-cln-tui.html">post</a>. dnilabs.com got two articles, and <a href="https://github.com/dni/comics">comics</a> got a few commits as a side project.</p>
+
+        <h2>conclusion</h2>
+        <p>the first half was a mix of a lot of things. Q3 was almost only one thing, and it shows in the numbers. writing a spec, two reference implementations and a conformance suite at the same time is a lot of churn, but every breaking change found a real problem, usually because someone else implemented it differently. in october the focus moved a bit further: hosted mints on <a href="https://run.lnurlcash.com">run.lnurlcash.com</a>, and formal proofs about the taproot cryptography underneath it in <a href="2026-10-29-taproot-lean-batch-verify.html">taproot-lean</a>.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/dni">github.com/dni</a></li>
+          <li><a href="https://github.com/search?q=author%3Adni+committer-date%3A2026-07-01..2026-09-30&type=commits">github commit search for 2026 Q3</a></li>
+          <li><a href="https://github.com/lnurlcash">github.com/lnurlcash</a></li>
+          <li><a href="https://github.com/lnurl/luds/pull/301">lnurl/luds PR #301</a></li>
+          <li><a href="https://github.com/BIMbeamFLX/bearlett">BIMbeamFLX/bearlett</a></li>
+          <li><a href="https://github.com/dni/lnurl-server">dni/lnurl-server</a></li>
+          <li><a href="https://github.com/dni/cln-tui">dni/cln-tui</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>

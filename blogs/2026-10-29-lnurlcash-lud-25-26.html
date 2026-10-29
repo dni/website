@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LNURLcash: LUD-25 and LUD-26, and everything around it - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>LNURLcash: LUD-25 and LUD-26, and everything around it</h1>
+        <p><time datetime="2026-10-29">2026-10-29</time></p>
+
+        <h2>introduction</h2>
+        <p>in august i wrote about <a href="2026-08-10-lnurlcash-lud-25.html">LUD-25, bearer assets</a>. back then a note was a <code>k1</code> secret, a <code>lnurlw://</code> link you could copy, print and hand over. a lot has happened since. the spec got reviewed hard, rewritten around taproot, split into two documents, and grew its own github org with mints, wallets, client libraries, hardware and a hosted service. this post is the update.</p>
+
+        <h2>the PR status</h2>
+        <p>everything still lives in one pull request on <a href="https://github.com/lnurl/luds">lnurl/luds</a>: <a href="https://github.com/lnurl/luds/pull/301">PR #301, "LUD-25/26: LNURLcash, programmable bearer notes"</a>. it is open and still a draft, but it is not a lonely draft anymore. it has two co-authors now, tbk (Thebora Kompanioni) and thecryptodonkey, and the review thread is the best part of the whole thing.</p>
+
+        <ul>
+          <li>the TollGate folks described a real use case: captive-portal internet access on OpenWrt routers, where the guest has no internet and no wallet. a bearer note works there on plain LUD-03 already.</li>
+          <li>thecryptodonkey built an independent LUD-25 stack, a mint, a wallet library and a conformance suite with an adversarial mock mint, and came back with a list of gaps. burns are now explicitly permanent, there is a real security considerations section, mutation requests got a retry rule (a GET that already burned its input must not be answered as if it never happened), and <code>comment</code> became mandatory for minting, matching what lnurl-mint already did.</li>
+          <li>small spelling questions like "is <code>withdrawLink</code> <code>https://</code> or <code>lnurlw://</code>" only show up once two independent implementations talk to each other. that's exactly why the conformance vectors exist.</li>
+        </ul>
+
+        <p>two side PRs came out of this work too. <a href="https://github.com/lnurl/luds/pull/302">#302</a> added a zero balance recommendation to LUD-03 and got merged in august. <a href="https://github.com/lnurl/luds/pull/312">#312</a> is a small, independent proposal for POST callbacks: send the same parameters as a JSON body instead of query parameters, which matters once you carry signatures and witnesses around instead of a single <code>k1</code>.</p>
+
+        <h2>LUD-25: unified taproot notes</h2>
+        <p>the biggest change is what a note <em>is</em>. it is no longer "a <code>k1</code> with a balance", it is a <a href="https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki">BIP-341</a> taproot output key <code>Q</code>, written <code>cp1&lt;Q&gt;</code>. the mint stores <code>Q</code> &rarr; value and nothing secret at all. a note is spent the same two ways a taproot output is spent on-chain:</p>
+
+        <ul>
+          <li><strong>key path</strong>, <code>ck1&lt;...&gt;</code>: a BIP-340 schnorr signature by <code>Q</code></li>
+          <li><strong>script path</strong>, <code>cw1&lt;...&gt;</code>: a leaf script, its control block and the witness it consumes</li>
+        </ul>
+
+        <p>the old bearer note is still there, it's just the simplest script: <code>OP_SHA256 &lt;h&gt; OP_EQUAL</code> under the nothing-up-my-sleeve point, so there is no key path and the preimage is the secret. and because everything follows from <code>h</code>, a mint accepts 64 hex characters as a short form, so a wallet that knows nothing about taproot can still use notes with nothing but sha256. old <code>k1</code> style links keep working.</p>
+
+        <p>the nice consequence: the mint verifies spends with bitcoin's own script rules, a spend is valid if consensus would accept it as input 0 of a canonical spend transaction. that makes the note <em>programmable</em>: timelocks, multi-party leaves, hashlocks, oracle conditions, all with one lookup, one verification rule and one certificate format. and the mint does not have to reimplement script, it can hand it to Bitcoin Core's <code>libbitcoinkernel</code>, which is what <a href="https://github.com/lnurlcash/kernel">lnurlcash/kernel</a> wraps.</p>
+
+        <p>offline verification stayed, but certificates are now schnorr too: the mint publishes a <code>mintPubkey</code>, ideally its node id, and signs the notes it hands out (<code>c</code>/<code>c2</code> for split outputs). a recipient can check issuer and amount without being online.</p>
+
+        <h2>LUD-26: derivation and Lightning Address</h2>
+        <p>LUD-25 got long, so at the end of september i split the HD part out into <a href="https://github.com/lnurl/luds/blob/lnurlcash/26.md">LUD-26, "note derivation and Lightning Address"</a>. it answers the question every bearer wallet runs into: what happens when you lose the device?</p>
+
+        <ul>
+          <li><strong>seed &amp; derivation.</strong> per-service accounts are derived hardened, reusing LUD-05's domain hashing under its own purpose (<code>m/139'</code>), then note keys are derived non-hardened from <code>(P, chaincode)</code> with BIP-341 style parity handling. account <code>0</code> is the wallet's own (<code>0'/0</code> for notes, <code>0'/1</code> for change), accounts <code>n &ge; 1</code> are shareable.</li>
+          <li><strong>recovery.</strong> re-derive <code>pk_0, pk_1, ...</code> per branch and per known service, ask the mint with <code>?p=cp1&lt;pk_i&gt;</code>, stop after a gap limit. exactly how on-chain HD wallets recover addresses. key-path notes come back from the seed alone, bearer and script notes still need their own backup.</li>
+          <li><strong>watch-only export.</strong> <code>cx1&lt;P || chaincode&gt;</code> is basically an xpub for notes. you can give it to a point-of-sale terminal or a bookkeeping tool that should see notes but never spend them. one fresh account per party, never account 0.</li>
+          <li><strong>Lightning Address auto-mint.</strong> register a <code>cx1</code> against a username and the mint publishes a normal LUD-16 address. every payment to <code>dni@mint.example</code> gets minted to the next unused key, the wallet finds it the same way it recovers. you can receive bearer notes while offline.</li>
+          <li><strong>internal transfer.</strong> a payee's <code>payRequest</code> metadata can carry one key of their <code>cx1</code>, so a wallet paying someone at the same mint just moves the note to that key instead of a round trip over lightning.</li>
+        </ul>
+
+        <p>today's commit on the spec branch is a breaking one: "derivation leaks". the derivation got tightened so a leaked note key together with a <code>cx1</code> can't reveal or link the private account. that's the kind of thing you only want to break while it's still a draft.</p>
+
+        <h2>the lnurlcash org</h2>
+        <p>around mid august the projects moved out of my personal account into <a href="https://github.com/lnurlcash">github.com/lnurlcash</a>, and it has grown quite a bit since:</p>
+
+        <ul>
+          <li><a href="https://github.com/lnurlcash/lnurl-wallet">lnurl-wallet</a>, hosted at <a href="https://wallet.lnurlcash.com">wallet.lnurlcash.com</a>: the serverless reference wallet. by far the busiest repo. recently it got an address page, multiple lightning addresses per mint, internal transfers to a user or a <code>cx1</code>, a qrcode addon, and address recovery fixes. it also has addons for DLC style bets (<code>dlc</code> and <code>betlocker</code>).</li>
+          <li><a href="https://github.com/lnurlcash/lnurl-mint">lnurl-mint</a>, hosted at <a href="https://mint.lnurlcash.com">mint.lnurlcash.com</a>: the python reference mint. went through the "grand taproot unification", the new derivation, and dropped all the compatibility code.</li>
+          <li><a href="https://github.com/lnurlcash/lnurlcash-core">lnurlcash-core</a>: the money-critical logic in rust, with UniFFI bindings for kotlin and swift, released on crates.io. <a href="https://github.com/lnurlcash/lnurl-mint-rust">lnurl-mint-rust</a> (a mint with a built-in LDK node, admin panel and cli), <a href="https://github.com/lnurlcash/cln-mint">cln-mint</a> (a Core Lightning plugin that runs a mint) and <a href="https://github.com/lnurlcash/lnurl-wallet-native">lnurl-wallet-native</a> all sit on top of it.</li>
+          <li>client libraries: <a href="https://github.com/lnurlcash/lnurlcash-kit">lnurlcash-kit</a> (typescript), <a href="https://github.com/lnurlcash/lnurlcash-py">lnurlcash-py</a>, <a href="https://github.com/lnurlcash/lnurlcash-go">lnurlcash-go</a> and <a href="https://github.com/lnurlcash/lnurlcash-kotlin">lnurlcash-kotlin</a>.</li>
+          <li><a href="https://github.com/lnurlcash/lnurlcash-conformance">lnurlcash-conformance</a>: shared vectors, an adversarial mock mint and a runner, so every implementation is tested against the same thing.</li>
+          <li><a href="https://github.com/lnurlcash/kernel">kernel</a>: a <code>libbitcoinkernel</code> wrapper for tapscript validation, as a python wheel and a rust crate.</li>
+          <li>hardware: <a href="https://github.com/lnurlcash/lnurl-vault">lnurl-vault</a> (<a href="https://vault.lnurlcash.com">vault.lnurlcash.com</a>), an ESP32 T-Display S3 companion that generates secrets and stores notes, and <a href="https://github.com/lnurlcash/lnurl-card">lnurl-card</a>, a credit-card-shaped ESP32 device with eInk, NFC, a keypad and no battery.</li>
+          <li>fun stuff: <a href="https://github.com/lnurlcash/raffle">raffle</a> (<a href="http://raffle.lnurlcash.com">raffle.lnurlcash.com</a>) generates printable raffle tickets that are notes, and <a href="https://github.com/lnurlcash/lnurlcash-contracts-demo">lnurlcash-contracts-demo</a> is a real-sats lab for receiver-locked notes and cancellation bonds.</li>
+          <li><a href="https://github.com/lnurlcash/awesome-lnurlcash">awesome-lnurlcash</a> collects implementations, tools and writing, including other people's.</li>
+        </ul>
+
+        <h2>oracle</h2>
+        <p>once notes are tapscript, a bet is just a script. <a href="https://github.com/lnurlcash/oracle">lnurlcash/oracle</a> is a standalone, single-oracle Discreet Log Contract service: it announces events ahead of time and later attests to the outcome that actually happened. the wallet's <code>betlocker</code> addon locks a note against an announcement and redeems it with the attestation.</p>
+
+        <p>it deliberately knows nothing about mints or notes, it never touches funds, it only signs outcomes. there is a small admin page for announcing and resolving events, and a scheduler that creates hourly and daily "will BTC be above its current price" events and auto-resolves them from a price feed. it is a single named oracle and not trustless, the design doc says so up front.</p>
+
+        <h2>run.lnurlcash.com</h2>
+        <p>the newest piece is <a href="https://run.lnurlcash.com">run.lnurlcash.com</a>, hosted LNURLcash mints. each mint is an unmodified lnurl-mint-rust with its own lightning node, kept liquid with LSPS2 and synced from a shared electrs over Bitcoin Core. provisioning works like the lnbits.com SaaS: run never talks to the cluster, it commits manifests to a kubernetes config repo and Argo CD rolls them out.</p>
+
+        <p>right now it's a beta list. you sign up with nostr (NIP-07 signer, NIP-98 http auth), only your pubkey, a short note and a timestamp get stored, no cookies. approved members can provision a mint straight from the page.</p>
+
+        <h2>what's next</h2>
+        <p>get the PR into a shape where it can be merged, keep the conformance vectors and all implementations in lockstep with every breaking change, and get a few real mints running on run.lnurlcash.com. if you build something on LNURLcash, open an issue on awesome-lnurlcash or comment on the PR.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/lnurl/luds/pull/301">LUD-25/26 PR #301</a></li>
+          <li><a href="https://github.com/lnurl/luds/blob/lnurlcash/25.md">LUD-25: LNURLcash, bearer assets</a></li>
+          <li><a href="https://github.com/lnurl/luds/blob/lnurlcash/26.md">LUD-26: LNURLcash note derivation and Lightning Address</a></li>
+          <li><a href="https://github.com/lnurl/luds/pull/312">PR #312: POST callbacks</a></li>
+          <li><a href="https://github.com/lnurl/luds/pull/302">PR #302: LUD-03 zero balance recommendation</a></li>
+          <li><a href="https://github.com/lnurlcash">github.com/lnurlcash</a></li>
+          <li><a href="https://github.com/lnurlcash/oracle">lnurlcash/oracle</a></li>
+          <li><a href="https://github.com/lnurlcash/run">lnurlcash/run</a>, hosted at <a href="https://run.lnurlcash.com">run.lnurlcash.com</a></li>
+          <li><a href="2026-08-10-lnurlcash-lud-25.html">LNURLcash: bearer assets with LUD-25</a> (the first post)</li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>

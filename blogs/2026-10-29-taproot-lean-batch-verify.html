@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>taproot-lean: proving BIP340 batch verification - dnilabs.com</title>
+</head>
+<body>
+    <p><a href="../index.html">Home</a></p>
+    <article>
+        <h1>taproot-lean: proving BIP340 batch verification</h1>
+        <p><time datetime="2026-10-29">2026-10-29</time></p>
+
+        <h2>introduction</h2>
+        <p>LNURLcash notes are taproot output keys now, and a mint spends a lot of its time checking schnorr signatures. so i wanted to know, not just believe, that the cryptography underneath does what the BIPs say. <a href="https://github.com/dni/taproot-lean">taproot-lean</a> is my attempt at that: machine-checked proofs in <a href="https://lean-lang.org">Lean 4</a>, with <a href="https://github.com/leanprover-community/mathlib4">Mathlib</a> and <a href="https://github.com/Verified-zkEVM/VCV-io">VCVio</a>, about BIP340 schnorr, BIP341 taproot, MuSig2, bech32m and DLCs.</p>
+
+        <h2>what's in there</h2>
+        <p>the proofs work over a concrete secp256k1 curve, built from Mathlib's elliptic curve group law, not over some abstract group. the primes <code>p</code> and <code>n</code> are proven prime inside Lean. hashes are modelled as arbitrary functions, so nothing about SHA-256 is assumed, and where a result needs collision resistance it is an explicit hypothesis.</p>
+
+        <p>most of it is correctness (sign then verify works, MuSig2 aggregation works, a DLC adaptor completes with the attestation), plus a few results about malicious inputs: non-malleability, special soundness (two signatures with the same <code>r</code> leak the key, so nonce reuse is fatal), script-tree binding, and an EUF-CMA reduction for BIP340 in the random oracle model.</p>
+
+        <h2>why batch verify</h2>
+        <p>BIP340 lets you check many signatures at once. instead of <code>u</code> separate checks you check one equation:</p>
+
+        <pre><code>&Sigma; a&#7522; &middot; (s&#7522;&middot;G - R&#7522; - e&#7522;&middot;P&#7522;) = 0      with a&#8321; = 1</code></pre>
+
+        <p>that is a lot faster, but it's also the spot where a mistake is easy to make. if the coefficients <code>a&#7522;</code> are predictable, an attacker can craft two invalid signatures whose errors cancel out, and the batch passes. so the question is: how random do the coefficients have to be, and does it still hold when they come from a hash of the batch, which the attacker chooses?</p>
+
+        <h2>what's proven so far</h2>
+        <p>in <code>Taproot/BIP340Props.lean</code>:</p>
+        <ul>
+          <li><code>batchVerify_of_valid</code>: a batch of valid signatures always passes, for every choice of coefficients.</li>
+          <li><code>batchVerify_sound</code>: if one signature is invalid, then once the other coefficients are fixed, at most one value of its coefficient lets the batch pass. a random coefficient catches it except with probability <code>1/n</code>.</li>
+          <li><code>batchVerify_sound_single</code>: a single invalid signature with a nonzero coefficient, like BIP340's fixed <code>a&#8321; = 1</code>, is always caught.</li>
+          <li><code>batchVerify_sound_bits</code> (new): the same with <code>b</code>-bit coefficients as long as <code>2^b &le; n</code>. so 128-bit coefficients, which is what implementations actually use because they are cheaper, catch a bad batch except with probability <code>2^-128</code>.</li>
+        </ul>
+
+        <h2>current focus: hash-derived coefficients</h2>
+        <p>the results above assume the coefficients are truly random and independent of the batch. real implementations don't work like that. libsecp256k1's batch verification API derives them deterministically and incrementally: <code>a&#7522;</code> is a hash of the first <code>i</code> entries. that means the coefficient is known as soon as those entries are, and the attacker can pick the later entries <em>after</em> seeing it.</p>
+
+        <p>that's what i'm working on right now, in a new file <code>Taproot/BIP340Batch.lean</code>. it models exactly that game in VCVio: the attacker gets access to a random oracle, outputs a batch, and the verifier derives the coefficients from the same oracle. the main theorem, <code>batch_incremental_sound</code>, says:</p>
+
+        <blockquote><p>if the attacker makes at most <code>q</code> oracle queries and outputs batches of at most <code>&ell;</code> signatures, a batch containing an invalid signature passes with probability at most <code>(q + &ell;) / 2^b</code>, for every choice of the challenge hash.</p></blockquote>
+
+        <p>the proof charges every win to one random oracle answer. take the last invalid entry <code>j</code> of a winning batch, then the prefix up to <code>j</code> already passes, and its equation only involves coefficients of prefixes of that batch. whichever of those is answered last has to hit the one value that solves the equation. the tricky part is that one fresh answer can complete many prefixes at once, all the cached extensions of the queried prefix. the naive "each query is bad with probability <code>1/2^b</code>" argument doesn't work then.</p>
+
+        <p>so the file has a small general lemma, <code>prEvent_bad_le</code>, a bad-event bound for lazily sampled random oracles with a potential: the number of cached prefixes that are still waiting for a coefficient. one query may be charged for several bad values, as long as earlier queries prepaid for them. with potential zero it's the usual bound, and the batch result falls out of it.</p>
+
+        <p>there is no <code>sorry</code> in it, but it is still work in progress and not pushed yet. i want to clean up the proof and the statement before it lands.</p>
+
+        <h2>limitations</h2>
+        <ul>
+          <li>batch verification assumes every point satisfies <code>n&middot;P = 0</code>. that's true for secp256k1 (cofactor 1), but proving it needs point counting, which isn't done.</li>
+          <li>it's the random oracle model, and transactions are reduced to the signed message. byte encodings only show up in the test-vector files.</li>
+          <li>MuSig2, adaptor signatures and DLCs still have no security reductions, only correctness and robustness results.</li>
+        </ul>
+
+        <h2>why bother</h2>
+        <p>tests tell you that the vectors pass. a proof tells you that no batch, chosen by anyone, slips through with more than the stated probability. for something like a mint that verifies other people's signatures with money on the line, i'd like to know which of the two i have. and Lean is surprisingly good company for that, it never lets you skip a step.</p>
+
+        <h2>references</h2>
+        <ul>
+          <li><a href="https://github.com/dni/taproot-lean">dni/taproot-lean</a></li>
+          <li><a href="https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki">BIP-340: Schnorr signatures</a>, section "Batch Verification"</li>
+          <li><a href="https://github.com/Verified-zkEVM/VCV-io">VCVio</a></li>
+          <li><a href="https://github.com/leanprover-community/mathlib4">Mathlib</a></li>
+          <li><a href="2026-10-29-lnurlcash-lud-25-26.html">LNURLcash: LUD-25 and LUD-26, and everything around it</a></li>
+        </ul>
+    </article>
+    <hr>
+    <h2>Blog</h2>
+    <ul id="blog-list"></ul>
+    <script src="../blogs.js"></script>
+</body>
+</html>
