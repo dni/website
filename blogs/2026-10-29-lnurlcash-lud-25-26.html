@@ -72,9 +72,20 @@
         <p>it deliberately knows nothing about mints or notes, it never touches funds, it only signs outcomes. there is a small admin page for announcing and resolving events, and a scheduler that creates hourly and daily "will BTC be above its current price" events and auto-resolves them from a price feed. it is a single named oracle and not trustless, the design doc says so up front.</p>
 
         <h2>run.lnurlcash.com</h2>
-        <p>the newest piece is <a href="https://run.lnurlcash.com">run.lnurlcash.com</a>, hosted LNURLcash mints. each mint is an unmodified lnurl-mint-rust with its own lightning node, kept liquid with LSPS2 and synced from a shared electrs over Bitcoin Core. provisioning works like the lnbits.com SaaS: run never talks to the cluster, it commits manifests to a kubernetes config repo and Argo CD rolls them out.</p>
+        <p>the newest piece is <a href="https://run.lnurlcash.com">run.lnurlcash.com</a>, hosted LNURLcash mints: your own mint that runs itself. you name it, and a few minutes later it lives at <code>you.run.lnurlcash.com</code> (or your own domain, with TLS) and has a Lightning Address that mints bearer notes for everyone who pays it.</p>
 
-        <p>right now it's a beta list. you sign up with nostr (NIP-07 signer, NIP-98 http auth), only your pubkey, a short note and a timestamp get stored, no cookies. approved members can provision a mint straight from the page.</p>
+        <ul>
+          <li><strong>its own node.</strong> each mint is an unmodified, MIT-licensed lnurl-mint-rust with its own ldk-node, its own volume and its own keys.</li>
+          <li><strong>liquidity via LSPS2.</strong> a fresh node can't be paid because nobody has a channel to it. with just-in-time channels the LSP opens a zero-conf channel when the first payment arrives, and the opening fee comes out of that payment, capped by a limit you set.</li>
+          <li><strong>chain sync, your choice.</strong> by default it syncs from Run's own fully validating Bitcoin node, or you point it at any Electrum server, public or your own.</li>
+          <li><strong>self-managing.</strong> upgrades roll out with a graceful node stop, node state gets snapshotted, health checks restart it, and on restart a pending melt is finished, resent or released, never guessed at. Rapid Gossip Sync means melts route from the first minute.</li>
+          <li><strong>configured from its admin.</strong> fees, the fee cap and the domain are set in the mint's admin UI, and the full admin plus <code>lnurl-mint-cli</code> stay yours.</li>
+          <li><strong>no lock-in.</strong> export the data directory and start the same image on your own hardware, same notes, same node, channels still open.</li>
+        </ul>
+
+        <p>under the hood run never talks to the cluster, it commits manifests to a kubernetes config repo and Argo CD rolls them out.</p>
+
+        <p>right now it's a free private beta. you sign up with nostr (NIP-07 signer, NIP-98 http auth), only your pubkey, a short note and a timestamp get stored, no cookies. approved members can provision a mint straight from the page.</p>
 
         <h2>what's next</h2>
         <p>get the PR into a shape where it can be merged, keep the conformance vectors and all implementations in lockstep with every breaking change, and get a few real mints running on run.lnurlcash.com. if you build something on LNURLcash, open an issue on awesome-lnurlcash or comment on the PR.</p>
