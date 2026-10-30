@@ -1,5 +1,16 @@
 window.blogs = [
   {
+    "title": "bip340-batch-verify: 128-bit randomizers are sound, and the bound is tight",
+    "date": "2026-10-30",
+    "categories": [
+      "bitcoin",
+      "taproot",
+      "lean",
+      "cryptography"
+    ],
+    "url": "blogs/2026-10-30-bip340-batch-verify.html"
+  },
+  {
     "title": "taproot-lean: proving BIP340 batch verification",
     "date": "2026-10-29",
     "categories": [
