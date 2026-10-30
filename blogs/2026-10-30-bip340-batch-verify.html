@@ -81,9 +81,21 @@ lake build</code></pre>
 
         <p>if it builds, every proof checked. be patient though: VCVio has no prebuilt cache, so the first build can take an hour or more. on machines with little memory use <code>LEAN_NUM_THREADS=1 lake build</code>.</p>
 
+        <h2>a catch: the seed encoding</h2>
+        <p>the proof gives every distinct batch its own random oracle answer. a real implementation hashes bytes, so that only carries over if the byte encoding is injective. checking that turned up a gap.</p>
+
+        <p>since its 2023-04 revision BIP340 accepts messages of any length. that was done so callers no longer have to pre-hash everything to 32 bytes. but the batch seed is still <code>seed_hash(pk&#8321;..pk&#7524; || m&#8321;..m&#7524; || sig&#8321;..sig&#7524;)</code>, with the messages concatenated and no lengths. move a byte from <code>m&#8321;</code> to <code>m&#8322;</code> and you get a different batch with the same seed, and so the same randomizers. the incremental derivation in <a href="https://github.com/bitcoin-core/secp256k1/pull/1134">libsecp256k1#1134</a> has the same shape: each entry is hashed as <code>type || sig || msg || pk</code> without <code>msglen</code>.</p>
+
+        <ul>
+          <li><strong>bitcoin is fine.</strong> in taproot every signed message is a 32-byte sighash, so the encoding is injective and the results apply as stated.</li>
+          <li><strong>for arbitrary-length messages</strong> one seed query can serve many batches, so the bound in seed-hash queries doesn't follow. i don't see a practical attack, since every extra batch still costs the attacker a challenge hash, but that part isn't proven.</li>
+          <li><strong>the fix is cheap:</strong> hash each message's length before the message. then the encoding is injective and the proof covers messages of any length.</li>
+        </ul>
+
         <h2>what's next</h2>
         <ul>
-          <li>bring the result to the discussion in sipa/bips#222, where i hope it helps settle the 128-bit question.</li>
+          <li>bring the result to the discussion in sipa/bips#222, where i hope it helps settle the 128-bit question, together with the length-prefix fix for the seed.</li>
+          <li>check the Lean model against the BIP340 test vectors.</li>
         </ul>
 
         <h2>references</h2>
