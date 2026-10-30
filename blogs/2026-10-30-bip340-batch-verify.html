@@ -81,6 +81,9 @@ lake build</code></pre>
 
         <p>if it builds, every proof checked. be patient though: VCVio has no prebuilt cache, so the first build can take an hour or more. on machines with little memory use <code>LEAN_NUM_THREADS=1 lake build</code>.</p>
 
+        <h2>checked against the BIP340 test vectors</h2>
+        <p>a proof is only as good as its model, so the model also runs the official <a href="https://github.com/bitcoin/bips/blob/master/bip-0340/test-vectors.csv">BIP340 test vectors</a> on every build. all 19 pass: <code>verify</code> accepts and rejects what it should, including the corner cases where <code>s&middot;G - e&middot;P</code> is the point at infinity, and <code>pubkey</code> and <code>sign</code> reproduce the published keys and signatures byte for byte. Mathlib's group law is too slow to evaluate on 256-bit numbers, so the tests run double-and-add versions that are <em>proven</em> equal to the definitions the theorems are about. SHA-256 and the tagged hashes are a small Lean implementation, checked against the FIPS examples.</p>
+
         <h2>a catch: the seed encoding</h2>
         <p>the proof gives every distinct batch its own random oracle answer. a real implementation hashes bytes, so that only carries over if the byte encoding is injective. checking that turned up a gap.</p>
 
@@ -95,7 +98,6 @@ lake build</code></pre>
         <h2>what's next</h2>
         <ul>
           <li>bring the result to the discussion in sipa/bips#222, where i hope it helps settle the 128-bit question, together with the length-prefix fix for the seed.</li>
-          <li>check the Lean model against the BIP340 test vectors.</li>
         </ul>
 
         <h2>references</h2>
