@@ -13,7 +13,7 @@
         <h2>introduction</h2>
         <p>yesterday i wrote about <a href="2026-10-29-taproot-lean-batch-verify.html">proving BIP340 batch verification in taproot-lean</a>, and said the hash-derived part was still work in progress. it's done now. i cleaned it up and pulled it out into its own repo, <a href="https://github.com/dni/bip340-batch-verify">bip340-batch-verify</a>, so people who only care about this one question don't have to build all of taproot-lean (BIP341, MuSig2, DLCs, bech32m) to check it.</p>
 
-        <p>the short version: BIP340 batch verification with <strong>128-bit randomizers derived deterministically from the batch</strong> is sound, the attacker wins with probability at most <code>(q + &ell;)/2^128</code>, and the <code>q</code> term can't be improved. all of it machine-checked in <a href="https://lean-lang.org">Lean 4</a> with <a href="https://github.com/leanprover-community/mathlib4">Mathlib</a> and <a href="https://github.com/Verified-zkEVM/VCV-io">VCVio</a>, no <code>sorry</code>.</p>
+        <p>the short version: BIP340 batch verification with <strong>128-bit randomizers derived deterministically from the batch</strong> is sound, the attacker wins with probability at most <code>(q + 1)/2^128</code> however large the batch, and up to that <code>+ 1</code> it can't be improved. all of it machine-checked in <a href="https://lean-lang.org">Lean 4</a> with <a href="https://github.com/leanprover-community/mathlib4">Mathlib</a> and <a href="https://github.com/Verified-zkEVM/VCV-io">VCVio</a>, no <code>sorry</code>.</p>
 
         <h2>why this matters right now</h2>
         <p><a href="https://github.com/sipa/bips/issues/219">sipa/bips#219</a> and <a href="https://github.com/sipa/bips/pull/222">sipa/bips#222</a> propose shrinking BIP340's batch-verification randomizers from 256 to 128 bits. that makes batch verification in libsecp256k1 up to about 9% faster. the pen-and-paper argument for it treats the randomizers as independent uniform values. but that's not what implementations do. they hash them out of the batch, and with incremental derivation, like libsecp256k1's batch API, the attacker gets to pick later entries <em>after</em> seeing earlier randomizers. that's exactly the gap i wanted closed.</p>
@@ -23,14 +23,14 @@
         <pre><code>&Sigma; a&#7522; &middot; (s&#7522;&middot;G - R&#7522; - e&#7522;&middot;P&#7522;) = 0      with a&#8321; = 1</code></pre>
 
         <h2>results</h2>
-        <p>each of these holds for every choice of the challenge hash. <code>q</code> is the number of random oracle queries the attacker makes, <code>&ell;</code> the maximum batch size, <code>b</code> the randomizer width.</p>
+        <p>each of these holds for every choice of the challenge hash. <code>q</code> is the number of random oracle queries the attacker makes, <code>b</code> the randomizer width. the batch size doesn't appear anywhere.</p>
 
         <ul>
           <li><strong>independent uniform randomizers</strong> (<code>batchVerify_sound_bits</code>): an invalid signature is caught except with probability <code>2^-b</code>. this is the textbook case.</li>
-          <li><strong>whole-batch derivation</strong>, as written in the BIP340 text (<code>batch_indexed_sound</code>): randomizer <code>a&#7522;</code> is the hash of the whole batch plus <code>i</code>. an invalid batch is accepted with probability at most <code>(q + &ell;)/2^b</code>.</li>
-          <li><strong>incremental derivation</strong>, as in libsecp256k1 (<code>batch_incremental_sound</code>): <code>a&#7522;</code> hashes the first <code>i</code> entries. the same bound, <code>(q + &ell;)/2^b</code>, even though the attacker adapts to the randomizers it has already seen.</li>
-          <li><strong>on secp256k1 with <code>b = 128</code></strong> (<code>secp256k1_batch_indexed_sound</code>, <code>secp256k1_batch_incremental_sound</code>): <code>(q + &ell;)/2^128</code>, with no extra hypothesis about the curve.</li>
-          <li><strong>lower bound, for both derivations</strong> (<code>batch_indexed_grind</code>, <code>batch_incremental_grind</code>): an explicit attacker reaches <code>1 - (1 - 2^-b)^q &asymp; q/2^b</code>, so the <code>q</code> term is tight.</li>
+          <li><strong>whole-batch derivation</strong>, as written in the BIP340 text (<code>batch_indexed_sound</code>): randomizer <code>a&#7522;</code> is the hash of the whole batch plus <code>i</code>. an invalid batch is accepted with probability at most <code>(q + 1)/2^b</code>.</li>
+          <li><strong>incremental derivation</strong>, as in libsecp256k1 (<code>batch_incremental_sound</code>): <code>a&#7522;</code> hashes the first <code>i</code> entries. the same bound, <code>(q + 1)/2^b</code>, even though the attacker adapts to the randomizers it has already seen.</li>
+          <li><strong>on secp256k1 with <code>b = 128</code></strong> (<code>secp256k1_batch_indexed_sound</code>, <code>secp256k1_batch_incremental_sound</code>): <code>(q + 1)/2^128</code>, with no extra hypothesis about the curve.</li>
+          <li><strong>lower bound, for both derivations</strong> (<code>batch_indexed_grind</code>, <code>batch_incremental_grind</code>): an explicit attacker reaches <code>1 - (1 - 2^-b)^q &asymp; q/2^b</code>, so the bound is tight.</li>
         </ul>
 
         <p>what that means in practice: 128-bit randomizers are fine, and the only price of deriving them deterministically is offline grinding at one hash per attempt. about <code>2^64</code> hashes buy you a <code>2^-64</code> chance of getting an invalid batch through. nothing cheaper than that exists, and the proof says so.</p>
@@ -49,7 +49,14 @@
 
         <p>incremental derivation is where it gets interesting. cut a winning batch after its last invalid signature. that prefix still passes, and its equation only involves randomizers of its own prefixes. whichever of those is answered last has to hit the one value that solves the equation. the problem is that one fresh answer can complete <em>many</em> prefixes at once, all the cached extensions of the prefix that was just queried. so the naive "one bad value per query" argument breaks.</p>
 
-        <p>the fix is a small, general lemma, <code>prEvent_bad_le</code>: a bad-event bound for lazily sampled random oracles with a potential, the number of cached prefixes still waiting to be completed. one query may be charged for several bad values, as long as earlier queries prepaid for them. each cached prefix is completed only once, so in total it's still one bad value per query. with potential zero it's the usual bound. i think that lemma is useful beyond this repo, for any random oracle argument where answers can complete more than one thing at once.</p>
+        <p>the fix is a small, general lemma, <code>wp_badVal_le</code>: a bad-event bound for lazily sampled random oracles with a potential, the number of cached prefixes still waiting to be completed. one query may be charged for several bad values, as long as earlier queries prepaid for them. each cached prefix is completed only once, so in total it's still one bad value per query. with potential zero it's the usual bound. i think that lemma is useful beyond this repo, for any random oracle argument where answers can complete more than one thing at once.</p>
+
+        <h2>from <code>q + &ell;</code> to <code>q + 1</code></h2>
+        <p>the first version of the proof gave <code>(q + &ell;)/2^b</code>, with <code>&ell;</code> the batch size. the <code>&ell;</code> came from the verifier: deriving the randomizers is <code>&ell;</code> more hash queries, and the generic argument charged each of them <code>1/2^b</code>. that's wasteful. only the <em>last</em> missing randomizer of the checked batch can complete it, so the verifier's queries are worth <code>1/2^b</code> together.</p>
+
+        <p>making that precise needed two changes. first, the lemma now bounds an expected value, the bad event plus the potential, instead of a probability. that way whatever potential the attacker leaves behind carries over into the verifier's phase, and a phase of queries can be paid for by the potential alone. second, for incremental derivation the bad event "some prefix ending in an invalid signature passes" is too coarse while the verifier works: a randomizer can be <code>0</code>, and then a prefix passes without the batch passing. so in that phase the bad event ignores the proper prefixes of the checked batch, and the potential pays <code>1</code> for the one prefix that matters.</p>
+
+        <p>so the bound is now <code>(q + 1)/2^b</code> for both derivations, and the batch size is gone from the statement entirely. against the grinding attacker's <code>&asymp; q/2^b</code> that's as tight as it gets.</p>
 
         <h2>trust base</h2>
         <ul>
